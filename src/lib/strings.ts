@@ -114,6 +114,10 @@ export const STR = {
   close: 'Закрыть',
 
   exportExcel: 'Экспорт в Excel',
+  exportGedcom: 'Экспорт GEDCOM',
+  importGedcom: 'Импорт GEDCOM',
+  importError: 'Не удалось импортировать файл',
+  moreActions: 'Ещё',
   autoLayout: 'Разложить как дерево',
   birthdaysTitle: 'Дни рождения',
   exportPng: 'Скачать картинкой',
@@ -170,6 +174,7 @@ export const fmt = {
   exSpousePair: (a: string, b: string) => `${a} и ${b} — бывшие супруги`,
   kinOf: (name: string, term: string, other: string) => `${name} — ${term}: ${other}`,
   uploading: (done: number, total: number) => `Загрузка ${done} из ${total}…`,
+  importDone: (p: number, r: number) => `Добавлено: ${p} чел., ${r} связей`,
   deletePersonWarning: (name: string) =>
     `${name} будет удалён(а) вместе со всеми связями и фотографиями. Это действие нельзя отменить.`,
 }

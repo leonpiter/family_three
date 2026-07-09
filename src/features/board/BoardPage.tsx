@@ -29,6 +29,7 @@ import { PersonSidebar } from '../person/PersonSidebar'
 import { PersonPickerDialog } from '../person/PersonPickerDialog'
 import { useAvatars } from '../photos/useAvatars'
 import { exportToExcel } from '../export/exportExcel'
+import { downloadGedcom, importGedcom } from '../export/gedcomIO'
 import { Modal, anyModalOpen } from '../../components/ui/Modal'
 import { useAuthStore } from '../auth/authStore'
 import { useIsTouch } from '../../hooks/useIsTouch'
@@ -76,7 +77,9 @@ function Board() {
   const [dropTargetId, setDropTargetId] = useState<string | null>(null)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
   const [searchOpen, setSearchOpen] = useState(false)
+  const [moreMenu, setMoreMenu] = useState<{ x: number; y: number } | null>(null)
   const centeredOnSelf = useRef(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     void loadAll()
@@ -176,6 +179,28 @@ function Board() {
     if (!p) return
     void setCenter(p.pos_x + 56, p.pos_y + 55, { duration: 500, zoom: 1.2 })
     if (!isTouch) selectPerson(id)
+  }
+
+  const moreMenuItems = (): MenuItem[] => [
+    { label: STR.exportExcel, onClick: () => void exportToExcel(persons, relationships) },
+    { label: STR.exportPng, onClick: () => void exportPng() },
+    { label: STR.exportGedcom, onClick: () => downloadGedcom(persons, relationships) },
+    { label: STR.importGedcom, onClick: () => fileInputRef.current?.click() },
+  ]
+
+  const openMoreMenu = (e: React.MouseEvent) => {
+    const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
+    setMoreMenu({ x: r.left, y: r.bottom + 4 })
+  }
+
+  const onImportFile = async (file: File) => {
+    try {
+      const { persons: np, relations: nr } = await importGedcom(await file.text())
+      await loadAll()
+      toast.success(fmt.importDone(np, nr))
+    } catch {
+      toast.error(STR.importError)
+    }
   }
 
   const exportPng = async () => {
@@ -351,15 +376,8 @@ function Board() {
           <Button variant="secondary" className="bg-white" onClick={() => setSearchOpen(true)}>
             {STR.search}
           </Button>
-          <Button variant="secondary" className="bg-white" onClick={() => void exportPng()}>
-            {STR.exportPng}
-          </Button>
-          <Button
-            variant="secondary"
-            className="bg-white"
-            onClick={() => void exportToExcel(persons, relationships)}
-          >
-            {STR.exportExcel}
+          <Button variant="secondary" className="bg-white" onClick={openMoreMenu}>
+            {STR.moreActions} ▾
           </Button>
         </Panel>
         {/* Мобильный: круглые кнопки поиска/раскладки/экспорта + FAB «+» */}
@@ -377,6 +395,13 @@ function Board() {
             className="flex h-12 w-12 items-center justify-center rounded-full border border-neutral-300 bg-white text-xl shadow-lg active:bg-neutral-100"
           >
             🌳
+          </button>
+          <button
+            aria-label={STR.moreActions}
+            onClick={openMoreMenu}
+            className="flex h-12 w-12 items-center justify-center rounded-full border border-neutral-300 bg-white text-xl shadow-lg active:bg-neutral-100"
+          >
+            ⋯
           </button>
           <button
             aria-label={STR.addPerson}
@@ -425,6 +450,27 @@ function Board() {
           onClose={() => setMenu(null)}
         />
       )}
+
+      {moreMenu && (
+        <ContextMenu
+          x={moreMenu.x}
+          y={moreMenu.y}
+          items={moreMenuItems()}
+          onClose={() => setMoreMenu(null)}
+        />
+      )}
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".ged,.gedcom,text/plain"
+        hidden
+        onChange={(e) => {
+          const f = e.target.files?.[0]
+          if (f) void onImportFile(f)
+          e.target.value = ''
+        }}
+      />
 
       {edgePop && relationships[edgePop.relId] && (
         <EdgePopover
