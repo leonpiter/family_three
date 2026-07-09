@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   Background,
   BackgroundVariant,
@@ -8,6 +8,7 @@ import {
   Panel,
   ReactFlow,
   ReactFlowProvider,
+  getNodesBounds,
   useEdgesState,
   useNodesState,
   useReactFlow,
@@ -22,16 +23,20 @@ import { ConnectTypeDialog } from './ConnectTypeDialog'
 import { ContextMenu, type MenuItem } from './ContextMenu'
 import { EdgePopover } from './EdgePopover'
 import { linkByRole, roleGender, rolePosition, type RelativeRole } from './addRelative'
+import { computeTreeLayout } from './autoLayout'
 import { PersonSidebar } from '../person/PersonSidebar'
+import { PersonPickerDialog } from '../person/PersonPickerDialog'
 import { useAvatars } from '../photos/useAvatars'
 import { exportToExcel } from '../export/exportExcel'
 import { Modal, anyModalOpen } from '../../components/ui/Modal'
 import { useAuthStore } from '../auth/authStore'
 import { useIsTouch } from '../../hooks/useIsTouch'
+import { supabase } from '../../lib/supabase'
 import { getParents } from '../../lib/relations'
 import { fullName, personToInput } from '../../lib/person'
 import { canEditPerson } from '../../lib/permissions'
 import { STR, fmt } from '../../lib/strings'
+import { toast } from 'sonner'
 import { Button } from '../../components/ui/Button'
 import { FullScreenSpinner } from '../../components/ui/Spinner'
 import type { Person } from '../../types/domain'
@@ -53,8 +58,9 @@ function Board() {
   const selectedPersonId = useBoardStore((s) => s.selectedPersonId)
   const selectPerson = useBoardStore((s) => s.selectPerson)
   const profile = useAuthStore((s) => s.profile)
+  const session = useAuthStore((s) => s.session)
   const isTouch = useIsTouch()
-  const { screenToFlowPosition, getIntersectingNodes } = useReactFlow()
+  const { screenToFlowPosition, getIntersectingNodes, setCenter, getNodes } = useReactFlow()
 
   const [nodes, setNodes, onNodesChange] = useNodesState<PersonFlowNode>([])
   const [edges, setEdges, onEdgesChange] = useEdgesState(mapToFlow([], []).edges)
@@ -68,16 +74,45 @@ function Board() {
   const [addRel, setAddRel] = useState<{ role: RelativeRole; egoId: string } | null>(null)
   const [dropTargetId, setDropTargetId] = useState<string | null>(null)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const centeredOnSelf = useRef(false)
 
   useEffect(() => {
     void loadAll()
-    // MVP без Realtime: обновляем данные, когда вкладка снова становится видимой.
     const onVisible = () => {
       if (document.visibilityState === 'visible') void loadAll()
     }
     document.addEventListener('visibilitychange', onVisible)
-    return () => document.removeEventListener('visibilitychange', onVisible)
+    // Realtime: правки других участников появляются без F5
+    const channel = supabase
+      .channel('board')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'persons' }, () =>
+        loadAll(),
+      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'relationships' }, () =>
+        loadAll(),
+      )
+      .subscribe()
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible)
+      void supabase.removeChannel(channel)
+    }
   }, [loadAll])
+
+  // Центрируемся на своей карточке при первой загрузке (у каждого — свой центр).
+  useEffect(() => {
+    if (centeredOnSelf.current || !loaded) return
+    const myId = session?.user.id
+    if (!myId) return
+    const mine = Object.values(persons).find((p) => p.user_id === myId)
+    centeredOnSelf.current = true
+    if (mine) {
+      window.setTimeout(
+        () => void setCenter(mine.pos_x + 56, mine.pos_y + 55, { duration: 600, zoom: 1 }),
+        100,
+      )
+    }
+  }, [loaded, persons, session, setCenter])
 
   useEffect(() => {
     const flow = mapToFlow(Object.values(persons), Object.values(relationships))
@@ -127,6 +162,46 @@ function Board() {
     setCreateAt(
       screenToFlowPosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 }),
     )
+
+  const runAutoLayout = () => {
+    const positions = computeTreeLayout(Object.values(persons), Object.values(relationships))
+    movePersons(positions.map((p) => ({ id: p.id, x: p.x, y: p.y })))
+    toast.success(STR.layoutDone)
+  }
+
+  // Навигация к персоне: центрировать и (на десктопе) открыть карточку.
+  const goToPerson = (id: string) => {
+    const p = useBoardStore.getState().persons[id]
+    if (!p) return
+    void setCenter(p.pos_x + 56, p.pos_y + 55, { duration: 500, zoom: 1.2 })
+    if (!isTouch) selectPerson(id)
+  }
+
+  const exportPng = async () => {
+    const nodes = getNodes()
+    if (nodes.length === 0) return
+    const bounds = getNodesBounds(nodes)
+    const pad = 60
+    const viewport = document.querySelector('.react-flow__viewport') as HTMLElement | null
+    if (!viewport) return
+    try {
+      const { toPng } = await import('html-to-image')
+      const url = await toPng(viewport, {
+        backgroundColor: '#fafafa',
+        width: bounds.width + pad * 2,
+        height: bounds.height + pad * 2,
+        style: {
+          transform: `translate(${-bounds.x + pad}px, ${-bounds.y + pad}px) scale(1)`,
+        },
+      })
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'семейное-древо.png'
+      a.click()
+    } catch {
+      toast.error(STR.pngError)
+    }
+  }
 
   const buildMenuItems = (ego: Person): MenuItem[] => {
     const parentLinks = getParents(ego.id, relationships)
@@ -267,8 +342,17 @@ function Board() {
           }}
         />
         {/* Десктоп: текстовая панель сверху слева */}
-        <Panel position="top-left" className="hidden gap-2 sm:flex">
+        <Panel position="top-left" className="hidden flex-wrap gap-2 sm:flex">
           <Button onClick={addAtCenter}>{STR.addPerson}</Button>
+          <Button variant="secondary" className="bg-white" onClick={runAutoLayout}>
+            {STR.autoLayout}
+          </Button>
+          <Button variant="secondary" className="bg-white" onClick={() => setSearchOpen(true)}>
+            {STR.search}
+          </Button>
+          <Button variant="secondary" className="bg-white" onClick={() => void exportPng()}>
+            {STR.exportPng}
+          </Button>
           <Button
             variant="secondary"
             className="bg-white"
@@ -277,14 +361,21 @@ function Board() {
             {STR.exportExcel}
           </Button>
         </Panel>
-        {/* Мобильный: FAB «+» и круглый экспорт снизу справа */}
+        {/* Мобильный: круглые кнопки поиска/раскладки/экспорта + FAB «+» */}
         <Panel position="bottom-right" className="flex flex-col gap-3 sm:hidden">
           <button
-            aria-label={STR.exportExcel}
-            onClick={() => void exportToExcel(persons, relationships)}
+            aria-label={STR.search}
+            onClick={() => setSearchOpen(true)}
             className="flex h-12 w-12 items-center justify-center rounded-full border border-neutral-300 bg-white text-xl shadow-lg active:bg-neutral-100"
           >
-            ⤓
+            🔍
+          </button>
+          <button
+            aria-label={STR.autoLayout}
+            onClick={runAutoLayout}
+            className="flex h-12 w-12 items-center justify-center rounded-full border border-neutral-300 bg-white text-xl shadow-lg active:bg-neutral-100"
+          >
+            🌳
           </button>
           <button
             aria-label={STR.addPerson}
@@ -380,6 +471,17 @@ function Board() {
           }}
         />
       )}
+      {searchOpen && (
+        <PersonPickerDialog
+          exclude={[]}
+          onClose={() => setSearchOpen(false)}
+          onPick={(p) => {
+            setSearchOpen(false)
+            goToPerson(p.id)
+          }}
+        />
+      )}
+
       {deleteTargetId && persons[deleteTargetId] && (
         <Modal title={STR.deletePersonTitle} onClose={() => setDeleteTargetId(null)}>
           <p className="text-sm text-neutral-700">
