@@ -266,6 +266,7 @@ function Board() {
 
       {selectedPersonId && persons[selectedPersonId] && (
         <PersonSidebar
+          key={selectedPersonId}
           person={persons[selectedPersonId]}
           avatarUrl={avatars.get(selectedPersonId)}
           onClose={() => selectPerson(null)}

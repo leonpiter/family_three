@@ -110,7 +110,8 @@ export function PersonSidebar({
         </div>
 
         <div className="mt-6 border-t border-neutral-100 pt-4">
-          <PhotoAlbum person={person} />
+          {/* key: при смене человека альбом монтируется заново — без чужого состояния */}
+          <PhotoAlbum key={person.id} person={person} />
         </div>
       </div>
 

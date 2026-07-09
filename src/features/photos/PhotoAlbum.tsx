@@ -38,6 +38,9 @@ export function PhotoAlbum({ person }: { person: Person }) {
   const autoAvatarTried = useRef<string | null>(null)
   useEffect(() => {
     if (!photos || photos.length === 0 || person.avatar_photo_id) return
+    // При переключении карточки photos на один рендер остаются от предыдущего
+    // человека — без этой проверки чужое фото станет аватаром.
+    if (photos[0].person_id !== person.id) return
     if (autoAvatarTried.current === person.id) return
     autoAvatarTried.current = person.id
     void updatePerson(person.id, { avatar_photo_id: photos[0].id })
