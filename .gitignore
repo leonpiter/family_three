@@ -8,6 +8,9 @@ dist/
 .env.local
 .env*.local
 
+# claude code — личные локальные настройки
+.claude/settings.local.json
+
 # editor / os
 .vscode/
 .idea/
