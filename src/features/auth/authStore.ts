@@ -45,7 +45,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   refreshProfile: async () => {
     const userId = get().session?.user.id
     if (!userId) return
-    const { data } = await supabase.from('profiles').select('*').eq('id', userId).single()
+    // maybeSingle: 0 строк не даёт ошибку. Сразу после регистрации профиль
+    // создаётся триггером — если гонка, один повтор через 800 мс.
+    let { data } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
+    if (!data && get().session?.user.id === userId) {
+      await new Promise((r) => setTimeout(r, 800))
+      ;({ data } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle())
+    }
     set({ profile: (data as Profile | null) ?? null })
   },
 

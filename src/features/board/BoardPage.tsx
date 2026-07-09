@@ -79,7 +79,15 @@ function Board() {
 
   useEffect(() => {
     const flow = mapToFlow(Object.values(persons), Object.values(relationships))
-    setNodes(flow.nodes)
+    // Не сбиваем позицию ноды, которую пользователь тащит прямо сейчас
+    // (фоновый refetch по visibilitychange не должен дёргать drag).
+    setNodes((prev) => {
+      const dragging = new Map(prev.filter((n) => n.dragging).map((n) => [n.id, n.position]))
+      if (dragging.size === 0) return flow.nodes
+      return flow.nodes.map((n) =>
+        dragging.has(n.id) ? { ...n, position: dragging.get(n.id)! } : n,
+      )
+    })
     setEdges(flow.edges)
   }, [persons, relationships, setNodes, setEdges])
 

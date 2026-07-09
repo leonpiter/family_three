@@ -62,6 +62,10 @@ export const useBoardStore = create<BoardState>((set, get) => ({
       return
     }
     const persons = Object.fromEntries((personsRes.data as Person[]).map((p) => [p.id, p]))
+    // Не затираем ещё не записанные в БД позиции (drag + фоновый refetch).
+    for (const [id, pos] of pendingPositions) {
+      if (persons[id]) persons[id] = { ...persons[id], pos_x: pos.x, pos_y: pos.y }
+    }
     set((s) => ({
       persons,
       relationships: Object.fromEntries(
@@ -89,11 +93,18 @@ export const useBoardStore = create<BoardState>((set, get) => ({
   updatePerson: async (id, patch) => {
     const prev = get().persons[id]
     if (!prev) return
-    // Оптимистично: сразу в UI, при ошибке откатываем.
+    // Оптимистично: сразу в UI, при ошибке откатываем только изменённые поля,
+    // чтобы не затереть параллельный move/другой апдейт.
     set((s) => ({ persons: { ...s.persons, [id]: { ...prev, ...patch } } }))
     const { error } = await supabase.from('persons').update(patch).eq('id', id)
     if (error) {
-      set((s) => ({ persons: { ...s.persons, [id]: prev } }))
+      const prevRec = prev as unknown as Record<string, unknown>
+      const rollback = Object.fromEntries(Object.keys(patch).map((k) => [k, prevRec[k]]))
+      set((s) => {
+        const cur = s.persons[id]
+        if (!cur) return {}
+        return { persons: { ...s.persons, [id]: { ...cur, ...rollback } } }
+      })
       toast.error(STR.saveError)
     }
   },

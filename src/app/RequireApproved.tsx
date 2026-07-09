@@ -10,7 +10,9 @@ export function RequireApproved({ children }: { children: ReactNode }) {
 
   if (initializing) return <FullScreenSpinner />
   if (!session) return <Navigate to="/login" replace />
-  if (!profile) return <FullScreenSpinner />
+  // Профиль ещё не пришёл — короткий спиннер; если его нет и после инициализации
+  // (транзиентная ошибка/гонка триггера) — не залипаем, ведём на /pending.
+  if (!profile) return <Navigate to="/pending" replace />
   if (profile.status !== 'approved') return <Navigate to="/pending" replace />
   return <>{children}</>
 }
