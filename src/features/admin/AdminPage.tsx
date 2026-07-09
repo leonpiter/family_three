@@ -5,7 +5,7 @@ import dayjs from 'dayjs'
 import 'dayjs/locale/ru'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../auth/authStore'
-import type { Profile, ProfileStatus } from '../../types/domain'
+import type { EditRequest, Profile, ProfileStatus } from '../../types/domain'
 import { STR } from '../../lib/strings'
 import { Button } from '../../components/ui/Button'
 import { FullScreenSpinner } from '../../components/ui/Spinner'
@@ -18,20 +18,31 @@ const statusView: Record<ProfileStatus, { label: string; cls: string }> = {
   rejected: { label: STR.statusRejected, cls: 'bg-red-100 text-red-700' },
 }
 
+type OpenRequest = EditRequest & {
+  person: { first_name: string; middle_name: string | null; last_name: string | null } | null
+  author: { display_name: string } | null
+}
+
 export default function AdminPage() {
   const me = useAuthStore((s) => s.profile)
   const [profiles, setProfiles] = useState<Profile[] | null>(null)
+  const [openRequests, setOpenRequests] = useState<OpenRequest[]>([])
 
   const load = useCallback(async () => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false })
-    if (error) {
+    const [profilesRes, requestsRes] = await Promise.all([
+      supabase.from('profiles').select('*').order('created_at', { ascending: false }),
+      supabase
+        .from('edit_requests')
+        .select('*, person:persons(first_name,middle_name,last_name), author:profiles(display_name)')
+        .eq('status', 'open')
+        .order('created_at', { ascending: false }),
+    ])
+    if (profilesRes.error) {
       toast.error(STR.loadError)
       return
     }
-    setProfiles(data as Profile[])
+    setProfiles(profilesRes.data as Profile[])
+    if (!requestsRes.error && requestsRes.data) setOpenRequests(requestsRes.data as OpenRequest[])
   }, [])
 
   useEffect(() => {
@@ -50,6 +61,21 @@ export default function AdminPage() {
     toast.success(STR.saved)
     void load()
   }
+
+  const closeRequest = async (id: string) => {
+    const { error } = await supabase.from('edit_requests').update({ status: 'done' }).eq('id', id)
+    if (error) {
+      toast.error(STR.saveError)
+      return
+    }
+    toast.success(STR.saved)
+    void load()
+  }
+
+  const personName = (r: OpenRequest) =>
+    r.person
+      ? [r.person.first_name, r.person.middle_name, r.person.last_name].filter(Boolean).join(' ')
+      : '—'
 
   return (
     <div className="mx-auto max-w-3xl p-6">
@@ -111,6 +137,36 @@ export default function AdminPage() {
               })}
             </tbody>
           </table>
+        </div>
+      )}
+
+      <h2 className="mb-3 mt-8 text-lg font-semibold text-neutral-900">
+        {STR.adminNotesTitle}
+      </h2>
+      {openRequests.length === 0 ? (
+        <p className="text-sm text-neutral-500">{STR.noOpenNotes}</p>
+      ) : (
+        <div className="space-y-2">
+          {openRequests.map((r) => (
+            <div
+              key={r.id}
+              className="rounded-xl border border-neutral-200 bg-white p-3 text-sm"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <span className="font-medium text-neutral-900">{personName(r)}</span>
+                <button
+                  className="shrink-0 font-medium text-emerald-700 hover:underline"
+                  onClick={() => void closeRequest(r.id)}
+                >
+                  {STR.markDone}
+                </button>
+              </div>
+              <p className="mt-1 whitespace-pre-wrap text-neutral-700">{r.message}</p>
+              <p className="mt-1 text-xs text-neutral-400">
+                {r.author?.display_name ?? '—'} · {dayjs(r.created_at).format('D MMMM YYYY')}
+              </p>
+            </div>
+          ))}
         </div>
       )}
     </div>

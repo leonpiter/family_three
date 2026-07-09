@@ -26,8 +26,10 @@ import { PersonSidebar } from '../person/PersonSidebar'
 import { useAvatars } from '../photos/useAvatars'
 import { exportToExcel } from '../export/exportExcel'
 import { anyModalOpen } from '../../components/ui/Modal'
+import { useAuthStore } from '../auth/authStore'
 import { getParents } from '../../lib/relations'
 import { personToInput } from '../../lib/person'
+import { canEditPerson } from '../../lib/permissions'
 import { STR } from '../../lib/strings'
 import { Button } from '../../components/ui/Button'
 import { FullScreenSpinner } from '../../components/ui/Spinner'
@@ -48,6 +50,7 @@ function Board() {
   const removeRelationship = useBoardStore((s) => s.removeRelationship)
   const selectedPersonId = useBoardStore((s) => s.selectedPersonId)
   const selectPerson = useBoardStore((s) => s.selectPerson)
+  const profile = useAuthStore((s) => s.profile)
   const { screenToFlowPosition, getIntersectingNodes } = useReactFlow()
 
   const [nodes, setNodes, onNodesChange] = useNodesState<PersonFlowNode>([])
@@ -148,7 +151,12 @@ function Board() {
         ],
       },
       { label: STR.linkExisting, onClick: () => setLinkFrom(ego.id) },
-      { label: STR.edit, onClick: () => setEditPersonId(ego.id) },
+      {
+        label: STR.edit,
+        disabled: !canEditPerson(ego, profile),
+        hint: !canEditPerson(ego, profile) ? STR.editRestricted : undefined,
+        onClick: () => setEditPersonId(ego.id),
+      },
     ]
   }
 

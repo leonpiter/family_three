@@ -7,7 +7,9 @@ import { useAuthStore } from '../auth/authStore'
 import { PersonDialog } from '../board/PersonDialog'
 import { PersonPickerDialog } from './PersonPickerDialog'
 import { KinshipList } from './KinshipList'
+import { EditRequests } from './EditRequests'
 import { PhotoAlbum } from '../photos/PhotoAlbum'
+import { canEditPerson } from '../../lib/permissions'
 import { circleClass, initialsOf } from '../../lib/avatar'
 import { fullName, fullNameLong, lifeYears, personToInput } from '../../lib/person'
 import { STR } from '../../lib/strings'
@@ -31,6 +33,7 @@ export function PersonSidebar({
   onRequestLink: (targetId: string) => void
 }) {
   const session = useAuthStore((s) => s.session)
+  const profile = useAuthStore((s) => s.profile)
   const updatePerson = useBoardStore((s) => s.updatePerson)
   const selectPerson = useBoardStore((s) => s.selectPerson)
   const { setCenter } = useReactFlow()
@@ -46,6 +49,7 @@ export function PersonSidebar({
   }
 
   const isYou = session != null && person.user_id === session.user.id
+  const canEdit = canEditPerson(person, profile)
   const years = lifeYears(person)
 
   const fieldRow = (label: string, value: string | null) =>
@@ -96,9 +100,17 @@ export function PersonSidebar({
           {fieldRow(STR.deathDate, person.death_date ? fmtDate(person.death_date) : null)}
           {fieldRow(STR.birthPlace, person.birth_place)}
           {fieldRow(STR.bio, person.bio)}
-          <Button variant="secondary" onClick={() => setEditOpen(true)} className="w-full">
-            {STR.edit}
-          </Button>
+          {canEdit ? (
+            <Button variant="secondary" onClick={() => setEditOpen(true)} className="w-full">
+              {STR.edit}
+            </Button>
+          ) : (
+            <p className="text-center text-xs text-neutral-400">{STR.editRestricted}</p>
+          )}
+        </div>
+
+        <div className="mt-5">
+          <EditRequests person={person} />
         </div>
 
         <div className="mt-6 border-t border-neutral-100 pt-4">

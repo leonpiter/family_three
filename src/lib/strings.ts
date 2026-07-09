@@ -111,6 +111,18 @@ export const STR = {
 
   exportExcel: 'Экспорт в Excel',
 
+  // Права и замечания
+  editRestricted: 'Карточку может изменять её автор, сам человек или админ',
+  writeToAdmin: 'Написать админу',
+  editRequestTitle: 'Замечание к карточке',
+  editRequestPlaceholder: 'Что нужно поправить? Сообщение увидят админ и автор карточки.',
+  send: 'Отправить',
+  sentOk: 'Отправлено',
+  notesTitle: 'Замечания',
+  markDone: 'Готово',
+  adminNotesTitle: 'Открытые замечания к карточкам',
+  noOpenNotes: 'Открытых замечаний нет',
+
   // Фотографии
   photosTitle: 'Фотографии',
   uploadHintDrop: 'Перетащите фото сюда или ',

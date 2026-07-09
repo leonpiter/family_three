@@ -33,6 +33,17 @@ export interface Person {
   updated_at: string
 }
 
+export type EditRequestStatus = 'open' | 'done'
+
+export interface EditRequest {
+  id: string
+  person_id: string
+  author_id: string | null
+  message: string
+  status: EditRequestStatus
+  created_at: string
+}
+
 export interface Photo {
   id: string
   person_id: string
