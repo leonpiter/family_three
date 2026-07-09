@@ -4,6 +4,7 @@ import type { PersonInput } from '../features/board/boardStore'
 export function personToInput(p: Person): PersonInput {
   return {
     first_name: p.first_name,
+    middle_name: p.middle_name,
     last_name: p.last_name,
     maiden_name: p.maiden_name,
     gender: p.gender,
@@ -16,6 +17,11 @@ export function personToInput(p: Person): PersonInput {
 
 export function fullName(p: Person): string {
   return [p.first_name, p.last_name].filter(Boolean).join(' ')
+}
+
+// Полное ФИО с отчеством — для шапки сайдбара; на нодах доски остаётся короткое.
+export function fullNameLong(p: Person): string {
+  return [p.first_name, p.middle_name, p.last_name].filter(Boolean).join(' ')
 }
 
 export function lifeYears(p: Person): string {

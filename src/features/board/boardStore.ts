@@ -7,6 +7,7 @@ import type { Person, Relationship, RelType, Gender } from '../../types/domain'
 
 export interface PersonInput {
   first_name: string
+  middle_name: string | null
   last_name: string | null
   maiden_name: string | null
   gender: Gender | null

@@ -8,6 +8,7 @@ import type { PersonInput } from './boardStore'
 
 const emptyInput: PersonInput = {
   first_name: '',
+  middle_name: null,
   last_name: null,
   maiden_name: null,
   gender: null,
@@ -61,16 +62,16 @@ export function PersonDialog({
             autoFocus
           />
           <Field
-            label={STR.lastName}
-            value={values.last_name ?? ''}
-            onChange={(e) => setField('last_name', orNull(e.target.value))}
+            label={STR.middleName}
+            value={values.middle_name ?? ''}
+            onChange={(e) => setField('middle_name', orNull(e.target.value))}
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <Field
-            label={STR.maidenName}
-            value={values.maiden_name ?? ''}
-            onChange={(e) => setField('maiden_name', orNull(e.target.value))}
+            label={STR.lastName}
+            value={values.last_name ?? ''}
+            onChange={(e) => setField('last_name', orNull(e.target.value))}
           />
           <label className="block">
             <span className="mb-1 block text-sm text-neutral-600">{STR.gender}</span>
@@ -85,6 +86,13 @@ export function PersonDialog({
             </select>
           </label>
         </div>
+        {(values.gender === 'f' || values.maiden_name) && (
+          <Field
+            label={STR.maidenName}
+            value={values.maiden_name ?? ''}
+            onChange={(e) => setField('maiden_name', orNull(e.target.value))}
+          />
+        )}
         <div className="grid grid-cols-2 gap-3">
           <Field
             label={STR.birthDate}

@@ -9,7 +9,7 @@ import { PersonPickerDialog } from './PersonPickerDialog'
 import { KinshipList } from './KinshipList'
 import { PhotoAlbum } from '../photos/PhotoAlbum'
 import { circleClass, initialsOf } from '../../lib/avatar'
-import { fullName, lifeYears, personToInput } from '../../lib/person'
+import { fullName, fullNameLong, lifeYears, personToInput } from '../../lib/person'
 import { STR } from '../../lib/strings'
 import { Button } from '../../components/ui/Button'
 import type { Person } from '../../types/domain'
@@ -78,7 +78,7 @@ export function PersonSidebar({
             )}
           </div>
           <div className="mt-2 text-base font-semibold text-neutral-900">
-            {fullName(person)}
+            {fullNameLong(person)}
             {person.maiden_name && (
               <span className="font-normal text-neutral-500"> ({person.maiden_name})</span>
             )}

@@ -16,6 +16,7 @@ export type RelType = 'parent' | 'spouse'
 export interface Person {
   id: string
   first_name: string
+  middle_name: string | null
   last_name: string | null
   maiden_name: string | null
   gender: Gender | null

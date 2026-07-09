@@ -5,6 +5,7 @@ import type { Gender, Person, Relationship, RelType } from '../types/domain'
 const person = (id: string, gender: Gender | null, name = id): Person => ({
   id,
   first_name: name,
+  middle_name: null,
   last_name: null,
   maiden_name: null,
   gender,

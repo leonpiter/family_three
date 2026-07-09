@@ -5,6 +5,7 @@ import type { Person, Relationship, RelType } from '../../types/domain'
 const person = (id: string, over: Partial<Person> = {}): Person => ({
   id,
   first_name: 'Имя',
+  middle_name: null,
   last_name: null,
   maiden_name: null,
   gender: null,

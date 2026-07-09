@@ -52,6 +52,7 @@ export const STR = {
   createPersonTitle: 'Новый родственник',
   editPersonTitle: 'Карточка родственника',
   firstName: 'Имя',
+  middleName: 'Отчество',
   lastName: 'Фамилия',
   maidenName: 'Девичья фамилия',
   gender: 'Пол',
