@@ -25,12 +25,12 @@ import { linkByRole, roleGender, rolePosition, type RelativeRole } from './addRe
 import { PersonSidebar } from '../person/PersonSidebar'
 import { useAvatars } from '../photos/useAvatars'
 import { exportToExcel } from '../export/exportExcel'
-import { anyModalOpen } from '../../components/ui/Modal'
+import { Modal, anyModalOpen } from '../../components/ui/Modal'
 import { useAuthStore } from '../auth/authStore'
 import { getParents } from '../../lib/relations'
-import { personToInput } from '../../lib/person'
+import { fullName, personToInput } from '../../lib/person'
 import { canEditPerson } from '../../lib/permissions'
-import { STR } from '../../lib/strings'
+import { STR, fmt } from '../../lib/strings'
 import { Button } from '../../components/ui/Button'
 import { FullScreenSpinner } from '../../components/ui/Spinner'
 import type { Person } from '../../types/domain'
@@ -48,6 +48,7 @@ function Board() {
   const movePersons = useBoardStore((s) => s.movePersons)
   const addRelationship = useBoardStore((s) => s.addRelationship)
   const removeRelationship = useBoardStore((s) => s.removeRelationship)
+  const deletePerson = useBoardStore((s) => s.deletePerson)
   const selectedPersonId = useBoardStore((s) => s.selectedPersonId)
   const selectPerson = useBoardStore((s) => s.selectPerson)
   const profile = useAuthStore((s) => s.profile)
@@ -64,6 +65,7 @@ function Board() {
   const [linkFrom, setLinkFrom] = useState<string | null>(null)
   const [addRel, setAddRel] = useState<{ role: RelativeRole; egoId: string } | null>(null)
   const [dropTargetId, setDropTargetId] = useState<string | null>(null)
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
 
   useEffect(() => {
     void loadAll()
@@ -157,6 +159,9 @@ function Board() {
         hint: !canEditPerson(ego, profile) ? STR.editRestricted : undefined,
         onClick: () => setEditPersonId(ego.id),
       },
+      ...(profile?.role === 'admin'
+        ? [{ label: STR.deletePerson, onClick: () => setDeleteTargetId(ego.id) }]
+        : []),
     ]
   }
 
@@ -341,6 +346,27 @@ function Board() {
               await linkByRole(addRel.role, addRelEgo.id, created.id, relationships, addRelationship)
           }}
         />
+      )}
+      {deleteTargetId && persons[deleteTargetId] && (
+        <Modal title={STR.deletePersonTitle} onClose={() => setDeleteTargetId(null)}>
+          <p className="text-sm text-neutral-700">
+            {fmt.deletePersonWarning(fullName(persons[deleteTargetId]))}
+          </p>
+          <div className="mt-4 flex justify-end gap-2">
+            <Button variant="secondary" onClick={() => setDeleteTargetId(null)}>
+              {STR.cancel}
+            </Button>
+            <Button
+              variant="danger"
+              onClick={() => {
+                void deletePerson(deleteTargetId)
+                setDeleteTargetId(null)
+              }}
+            >
+              {STR.deletePerson}
+            </Button>
+          </div>
+        </Modal>
       )}
       {pendingConn && persons[pendingConn.source] && persons[pendingConn.target] && (
         <ConnectTypeDialog

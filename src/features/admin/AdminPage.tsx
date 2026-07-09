@@ -23,19 +23,32 @@ type OpenRequest = EditRequest & {
   author: { display_name: string } | null
 }
 
+type PersonLite = {
+  id: string
+  first_name: string
+  middle_name: string | null
+  last_name: string | null
+  user_id: string | null
+}
+
+const liteName = (p: PersonLite) =>
+  [p.first_name, p.middle_name, p.last_name].filter(Boolean).join(' ')
+
 export default function AdminPage() {
   const me = useAuthStore((s) => s.profile)
   const [profiles, setProfiles] = useState<Profile[] | null>(null)
   const [openRequests, setOpenRequests] = useState<OpenRequest[]>([])
+  const [persons, setPersons] = useState<PersonLite[]>([])
 
   const load = useCallback(async () => {
-    const [profilesRes, requestsRes] = await Promise.all([
+    const [profilesRes, requestsRes, personsRes] = await Promise.all([
       supabase.from('profiles').select('*').order('created_at', { ascending: false }),
       supabase
         .from('edit_requests')
         .select('*, person:persons(first_name,middle_name,last_name), author:profiles(display_name)')
         .eq('status', 'open')
         .order('created_at', { ascending: false }),
+      supabase.from('persons').select('id,first_name,middle_name,last_name,user_id'),
     ])
     if (profilesRes.error) {
       toast.error(STR.loadError)
@@ -43,6 +56,11 @@ export default function AdminPage() {
     }
     setProfiles(profilesRes.data as Profile[])
     if (!requestsRes.error && requestsRes.data) setOpenRequests(requestsRes.data as OpenRequest[])
+    if (!personsRes.error && personsRes.data) {
+      const list = personsRes.data as PersonLite[]
+      list.sort((a, b) => liteName(a).localeCompare(liteName(b), 'ru'))
+      setPersons(list)
+    }
   }, [])
 
   useEffect(() => {
@@ -77,6 +95,33 @@ export default function AdminPage() {
       ? [r.person.first_name, r.person.middle_name, r.person.last_name].filter(Boolean).join(' ')
       : '—'
 
+  // Привязка аккаунта к карточке: у аккаунта максимум одна карточка (unique user_id)
+  const linkPerson = async (profileId: string, personId: string) => {
+    const current = persons.find((p) => p.user_id === profileId)
+    if (current && current.id !== personId) {
+      const { error } = await supabase
+        .from('persons')
+        .update({ user_id: null })
+        .eq('id', current.id)
+      if (error) {
+        toast.error(STR.saveError)
+        return
+      }
+    }
+    if (personId && current?.id !== personId) {
+      const { error } = await supabase
+        .from('persons')
+        .update({ user_id: profileId })
+        .eq('id', personId)
+      if (error) {
+        toast.error(STR.saveError)
+        return
+      }
+    }
+    toast.success(STR.saved)
+    void load()
+  }
+
   return (
     <div className="mx-auto max-w-3xl p-6">
       <h1 className="mb-4 text-lg font-semibold text-neutral-900">{STR.adminTitle}</h1>
@@ -91,6 +136,7 @@ export default function AdminPage() {
                 <th className="px-4 py-2.5 font-medium">{STR.colEmail}</th>
                 <th className="px-4 py-2.5 font-medium">{STR.colDate}</th>
                 <th className="px-4 py-2.5 font-medium">{STR.colStatus}</th>
+                <th className="px-4 py-2.5 font-medium">{STR.colPersonLink}</th>
                 <th className="px-4 py-2.5 font-medium">{STR.colActions}</th>
               </tr>
             </thead>
@@ -115,6 +161,26 @@ export default function AdminPage() {
                       <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${sv.cls}`}>
                         {sv.label}
                       </span>
+                    </td>
+                    <td className="px-4 py-2.5">
+                      {p.status === 'approved' ? (
+                        <select
+                          value={persons.find((pe) => pe.user_id === p.id)?.id ?? ''}
+                          onChange={(e) => void linkPerson(p.id, e.target.value)}
+                          className="w-44 rounded-lg border border-neutral-300 px-2 py-1 text-sm outline-none focus:border-emerald-600"
+                        >
+                          <option value="">{STR.notLinked}</option>
+                          {persons
+                            .filter((pe) => !pe.user_id || pe.user_id === p.id)
+                            .map((pe) => (
+                              <option key={pe.id} value={pe.id}>
+                                {liteName(pe)}
+                              </option>
+                            ))}
+                        </select>
+                      ) : (
+                        <span className="text-neutral-300">—</span>
+                      )}
                     </td>
                     <td className="px-4 py-2.5">
                       {p.id !== me?.id && (

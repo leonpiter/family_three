@@ -24,16 +24,18 @@ npm run dev                  # http://localhost:5173
 ## Настройка Supabase (с нуля)
 
 1. Создать бесплатный проект на [supabase.com](https://supabase.com) (регион любой, ближе — лучше, например `eu-central`).
-2. **Ключи**: Project Settings → API → скопировать `Project URL` и `anon public` key в `.env.local`:
+2. **Ключи**: Project Settings → API Keys → скопировать `Project URL` и `Publishable key` в `.env.local`:
    ```
    VITE_SUPABASE_URL=https://<ref>.supabase.co
-   VITE_SUPABASE_ANON_KEY=<anon key>
+   VITE_SUPABASE_ANON_KEY=<publishable key>
    ```
-3. **Схема БД**: применить SQL-файлы из `supabase/migrations/` по порядку (0001, затем 0004) — проще всего вставить содержимое в SQL Editor дашборда и выполнить.
-4. **Auth**: Authentication → Sign In / Up → Email: включён, "Confirm email" — включено.
+3. **Схема БД**: применить SQL-файлы из `supabase/migrations/` **по порядку номеров**. Два способа:
+   - вставить содержимое в SQL Editor дашборда и выполнить;
+   - или через Management API: положить personal access token (`sbp_...`, [страница токенов](https://supabase.com/dashboard/account/tokens)) в `.env.local` как `SUPABASE_ACCESS_TOKEN` и выполнить `node scripts/apply-sql.mjs supabase/migrations/000X_name.sql` (не забыть поменять PROJECT_REF в скрипте).
+4. **Auth**: Authentication → Sign In / Up → Email включён, "Confirm email" включено.
    Authentication → URL Configuration:
    - Site URL: `https://leonpiter.github.io/family_three/`
-   - Redirect URLs: добавить `http://localhost:5173/**`
+   - Redirect URLs: `http://localhost:5173/**` и `https://leonpiter.github.io/family_three/**`
 5. **Бутстрап первого админа** (один раз, после своей регистрации и подтверждения почты) — SQL Editor:
    ```sql
    update public.profiles
@@ -53,10 +55,18 @@ npm run dev                  # http://localhost:5173
 
 ## Эксплуатация (free tier)
 
-- **Пауза Supabase** после ~7 дней неактивности: keepalive-cron появится в Спринте 4; разбудить вручную — кнопка Restore в дашборде (~1–2 мин).
-- **Бэкапы**: раз в месяц `npx supabase db dump` локально; фото — ручная выгрузка bucket'а.
+- **Пауза Supabase** после ~7 дней неактивности: предотвращается воркфлоу [keepalive.yml](.github/workflows/keepalive.yml) (пинг пн/чт); разбудить вручную — кнопка Restore в дашборде (~1–2 мин).
+- **Бэкапы**: данные можно выгрузить кнопкой «Экспорт в Excel» прямо на доске; полный дамп — `npx supabase db dump`; фото — ручная выгрузка bucket'а `photos`.
 - **Письма**: встроенный SMTP Supabase шлёт единицы писем в час. Если регистраций много — подключить бесплатный Resend как custom SMTP.
+
+## Как устроены права
+
+- Зарегистрироваться может любой, доступ открывает админ («Заявки и участники»).
+- Биографию карточки меняет её **автор**, **сам человек** (если админ привязал карточку к аккаунту) или **админ**; двигать кружочки и добавлять фото могут все одобренные. Защита — RLS и триггеры в БД, не только UI.
+- Чужую карточку можно прокомментировать кнопкой «Написать админу» — замечание видно в карточке и в сводке админа.
+- Удаление персоны — только админ (правый клик → «Удалить с доски»).
 
 ## Статус
 
-Спринт 1 (каркас, аутентификация, одобрение) — код готов; ожидает создания проекта Supabase и первого деплоя. Далее: Спринт 2 — доска с React Flow.
+Спринты 1–4 завершены, сервис работает: https://leonpiter.github.io/family_three/
+Дальнейшие идеи — в [бэклоге спринт-плана](docs/SPRINT-PLAN.md).

@@ -1,0 +1,18 @@
+# Пинг Supabase дважды в неделю: реальный запрос к PostgREST засчитывается
+# как активность и не даёт free-проекту заснуть (пауза после ~7 дней тишины).
+name: Keepalive Supabase
+
+on:
+  schedule:
+    - cron: '0 6 * * 1,4' # пн и чт, 06:00 UTC
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping keepalive table
+        run: |
+          curl -sf "${{ vars.VITE_SUPABASE_URL }}/rest/v1/keepalive?select=id" \
+            -H "apikey: ${{ vars.VITE_SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ vars.VITE_SUPABASE_ANON_KEY }}"

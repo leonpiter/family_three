@@ -45,6 +45,8 @@ export const STR = {
   colDate: 'Регистрация',
   colStatus: 'Статус',
   colActions: 'Действия',
+  colPersonLink: 'Карточка на древе',
+  notLinked: '— не привязана —',
   noProfiles: 'Пока никто не зарегистрирован.',
 
   // Доска
@@ -122,6 +124,9 @@ export const STR = {
   markDone: 'Готово',
   adminNotesTitle: 'Открытые замечания к карточкам',
   noOpenNotes: 'Открытых замечаний нет',
+  deletePerson: 'Удалить с доски',
+  deletePersonTitle: 'Удалить безвозвратно?',
+  deleted: 'Удалено',
 
   // Фотографии
   photosTitle: 'Фотографии',
@@ -157,4 +162,6 @@ export const fmt = {
   exSpousePair: (a: string, b: string) => `${a} и ${b} — бывшие супруги`,
   kinOf: (name: string, term: string, other: string) => `${name} — ${term}: ${other}`,
   uploading: (done: number, total: number) => `Загрузка ${done} из ${total}…`,
+  deletePersonWarning: (name: string) =>
+    `${name} будет удалён(а) вместе со всеми связями и фотографиями. Это действие нельзя отменить.`,
 }

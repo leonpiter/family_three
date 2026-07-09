@@ -34,6 +34,7 @@ interface BoardState {
   addRelationship: (fromId: string, toId: string, type: RelType, isEx?: boolean) => Promise<void>
   updateRelationship: (id: string, patch: { is_ex: boolean }) => Promise<void>
   removeRelationship: (id: string) => Promise<void>
+  deletePerson: (id: string) => Promise<void>
 }
 
 // Позиции пишутся в БД пачкой с debounce 400 мс после окончания перетаскивания.
@@ -160,5 +161,38 @@ export const useBoardStore = create<BoardState>((set, get) => ({
       set({ relationships: prev })
       toast.error(STR.saveError)
     }
+  },
+
+  // Только админ (RLS persons_delete). Связи и строки фото уходят каскадом,
+  // файлы в storage чистим сами.
+  deletePerson: async (id) => {
+    const { data: photoRows } = await supabase
+      .from('photos')
+      .select('storage_path,thumb_path')
+      .eq('person_id', id)
+    const { error } = await supabase.from('persons').delete().eq('id', id)
+    if (error) {
+      toast.error(STR.saveError)
+      return
+    }
+    const paths = ((photoRows ?? []) as { storage_path: string; thumb_path: string }[]).flatMap(
+      (r) => [r.storage_path, r.thumb_path],
+    )
+    if (paths.length > 0) await supabase.storage.from('photos').remove(paths)
+    set((s) => {
+      const persons = { ...s.persons }
+      delete persons[id]
+      const relationships = Object.fromEntries(
+        Object.entries(s.relationships).filter(
+          ([, r]) => r.from_person_id !== id && r.to_person_id !== id,
+        ),
+      )
+      return {
+        persons,
+        relationships,
+        selectedPersonId: s.selectedPersonId === id ? null : s.selectedPersonId,
+      }
+    })
+    toast.success(STR.deleted)
   },
 }))
