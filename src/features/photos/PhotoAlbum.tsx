@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import Lightbox from 'yet-another-react-lightbox'
 import Captions from 'yet-another-react-lightbox/plugins/captions'
@@ -32,6 +32,16 @@ export function PhotoAlbum({ person }: { person: Person }) {
   const urls = useSignedUrls(
     photos ? [...photos.map((p) => p.thumb_path), ...photos.map((p) => p.storage_path)] : [],
   )
+
+  // Если аватар не выбран, а фото есть — первое становится аватаром автоматически
+  // (покрывает и старые загрузки, и удаление текущего аватара).
+  const autoAvatarTried = useRef<string | null>(null)
+  useEffect(() => {
+    if (!photos || photos.length === 0 || person.avatar_photo_id) return
+    if (autoAvatarTried.current === person.id) return
+    autoAvatarTried.current = person.id
+    void updatePerson(person.id, { avatar_photo_id: photos[0].id })
+  }, [photos, person.id, person.avatar_photo_id, updatePerson])
 
   const setAvatar = async (photo: Photo) => {
     await updatePerson(person.id, { avatar_photo_id: photo.id })
@@ -101,7 +111,7 @@ export function PhotoAlbum({ person }: { person: Person }) {
                         аватар
                       </span>
                     )}
-                    <div className="absolute inset-x-0 bottom-0 hidden items-center justify-center gap-2 rounded-b-lg bg-black/55 py-1 text-xs text-white group-hover:flex">
+                    <div className="photo-actions absolute inset-x-0 bottom-0 hidden items-center justify-center gap-2 rounded-b-lg bg-black/55 py-1 text-xs text-white group-hover:flex">
                       {confirmDeleteId === ph.id ? (
                         <>
                           <button

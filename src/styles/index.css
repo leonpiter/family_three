@@ -11,4 +11,8 @@
   .react-flow__handle {
     opacity: 0.55 !important;
   }
+  /* ...и кнопки действий на миниатюрах фото тоже */
+  .photo-actions {
+    display: flex !important;
+  }
 }
