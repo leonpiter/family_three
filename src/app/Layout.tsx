@@ -7,7 +7,7 @@ export function Layout() {
   const signOut = useAuthStore((s) => s.signOut)
 
   return (
-    <div className="flex min-h-screen flex-col bg-neutral-50">
+    <div className="flex h-screen flex-col bg-neutral-50">
       <header className="flex items-center justify-between border-b border-neutral-200 bg-white px-4 py-2.5">
         <div className="flex items-center gap-5">
           <Link to="/" className="text-base font-semibold text-neutral-900">
@@ -34,7 +34,7 @@ export function Layout() {
           </button>
         </div>
       </header>
-      <main className="flex-1">
+      <main className="min-h-0 flex-1 overflow-auto">
         <Outlet />
       </main>
     </div>

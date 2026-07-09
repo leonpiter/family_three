@@ -47,8 +47,30 @@ export const STR = {
   colActions: 'Действия',
   noProfiles: 'Пока никто не зарегистрирован.',
 
-  // Board (Спринт 2)
-  boardPlaceholder: 'Доска семейного древа появится здесь в Спринте 2 🌳',
+  // Доска
+  addPerson: '+ Добавить родственника',
+  createPersonTitle: 'Новый родственник',
+  editPersonTitle: 'Карточка родственника',
+  firstName: 'Имя',
+  lastName: 'Фамилия',
+  maidenName: 'Девичья фамилия',
+  gender: 'Пол',
+  genderM: 'Мужской',
+  genderF: 'Женский',
+  genderUnset: 'Не указан',
+  birthDate: 'Дата рождения',
+  deathDate: 'Дата смерти',
+  birthPlace: 'Место рождения',
+  bio: 'Биография, заметки',
+  save: 'Сохранить',
+  cancel: 'Отмена',
+  createAction: 'Добавить',
+  connectTitle: 'Какая это связь?',
+  spouses: 'супруги',
+  relExists: 'Такая связь уже есть',
+  posSaveError: 'Не удалось сохранить расположение',
+  boardEmpty:
+    'На доске пока никого. Нажмите «Добавить родственника» или дважды кликните по пустому месту.',
 
   // Общее
   saved: 'Сохранено',
@@ -63,3 +85,9 @@ export const STR = {
   errRateLimit: 'Слишком много попыток — подождите немного и попробуйте снова',
   errGeneric: 'Что-то пошло не так, попробуйте ещё раз',
 } as const
+
+// Шаблонные строки
+export const fmt = {
+  parentOf: (parent: string, child: string) => `${parent} — родитель: ${child}`,
+  spousePair: (a: string, b: string) => `${a} и ${b} — супруги`,
+}
