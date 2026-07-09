@@ -1,1 +1,7 @@
 @import "tailwindcss";
+
+/* Режим «Связать с…»: перекрываем курсоры React Flow */
+.linking .react-flow__pane,
+.linking .react-flow__node {
+  cursor: crosshair !important;
+}

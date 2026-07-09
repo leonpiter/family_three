@@ -72,6 +72,40 @@ export const STR = {
   boardEmpty:
     'На доске пока никого. Нажмите «Добавить родственника» или дважды кликните по пустому месту.',
 
+  // Контекстное меню и связывание
+  addRelativeMenu: 'Добавить родственника',
+  roleFather: 'Отец',
+  roleMother: 'Мать',
+  roleSon: 'Сын',
+  roleDaughter: 'Дочь',
+  roleHusband: 'Муж',
+  roleWife: 'Жена',
+  roleSpouse: 'Супруг(а)',
+  roleBrother: 'Брат',
+  roleSister: 'Сестра',
+  linkExisting: 'Связать с…',
+  linkModeHint: 'Кликните по человеку, с которым установить связь · Esc — отмена',
+  edit: 'Редактировать',
+  needParentsHint: 'Сначала добавьте родителей',
+  hasFatherHint: 'Отец уже указан',
+  hasMotherHint: 'Мать уже указана',
+  deleteRelation: 'Удалить связь',
+  confirmDelete: 'Точно удалить?',
+
+  // Сайдбар
+  kinshipTitle: 'Родство',
+  groupParents: 'Родители',
+  groupSpouses: 'Супруг(а)',
+  groupChildren: 'Дети',
+  groupSiblings: 'Братья и сёстры',
+  groupOtherKin: 'Другая родня',
+  addRelation: 'Добавить связь',
+  youBadge: 'Это вы',
+  pickPersonTitle: 'Выберите человека',
+  searchPlaceholder: 'Поиск по имени…',
+  nothingFound: 'Никого не нашлось',
+  close: 'Закрыть',
+
   // Общее
   saved: 'Сохранено',
   loadError: 'Не удалось загрузить данные',
@@ -90,4 +124,5 @@ export const STR = {
 export const fmt = {
   parentOf: (parent: string, child: string) => `${parent} — родитель: ${child}`,
   spousePair: (a: string, b: string) => `${a} и ${b} — супруги`,
+  kinOf: (name: string, term: string, other: string) => `${name} — ${term}: ${other}`,
 }

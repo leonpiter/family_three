@@ -21,8 +21,10 @@ interface BoardState {
   relationships: Record<string, Relationship>
   loading: boolean
   loaded: boolean
+  selectedPersonId: string | null
+  selectPerson: (id: string | null) => void
   loadAll: () => Promise<void>
-  createPerson: (input: PersonInput & { pos_x: number; pos_y: number }) => Promise<void>
+  createPerson: (input: PersonInput & { pos_x: number; pos_y: number }) => Promise<Person | null>
   updatePerson: (id: string, patch: Partial<PersonInput>) => Promise<void>
   movePersons: (moves: { id: string; x: number; y: number }[]) => void
   addRelationship: (fromId: string, toId: string, type: RelType) => Promise<void>
@@ -38,6 +40,9 @@ export const useBoardStore = create<BoardState>((set, get) => ({
   relationships: {},
   loading: false,
   loaded: false,
+  selectedPersonId: null,
+
+  selectPerson: (id) => set({ selectedPersonId: id }),
 
   loadAll: async () => {
     set({ loading: !get().loaded })
@@ -50,24 +55,29 @@ export const useBoardStore = create<BoardState>((set, get) => ({
       toast.error(STR.loadError)
       return
     }
-    set({
-      persons: Object.fromEntries((personsRes.data as Person[]).map((p) => [p.id, p])),
+    const persons = Object.fromEntries((personsRes.data as Person[]).map((p) => [p.id, p]))
+    set((s) => ({
+      persons,
       relationships: Object.fromEntries(
         (relsRes.data as Relationship[]).map((r) => [r.id, r]),
       ),
       loading: false,
       loaded: true,
-    })
+      // выбранная персона могла быть удалена с другого устройства
+      selectedPersonId:
+        s.selectedPersonId && persons[s.selectedPersonId] ? s.selectedPersonId : null,
+    }))
   },
 
   createPerson: async (input) => {
     const { data, error } = await supabase.from('persons').insert(input).select().single()
     if (error) {
       toast.error(STR.saveError)
-      return
+      return null
     }
     const person = data as Person
     set((s) => ({ persons: { ...s.persons, [person.id]: person } }))
+    return person
   },
 
   updatePerson: async (id, patch) => {

@@ -2,7 +2,7 @@ import type { Edge, Node } from '@xyflow/react'
 import type { Person, Relationship } from '../../types/domain'
 import { parentEdgeProps, spouseEdgeProps } from './edgeStyles'
 
-export type PersonFlowNode = Node<{ person: Person }, 'person'>
+export type PersonFlowNode = Node<{ person: Person; dropTarget?: boolean }, 'person'>
 
 // Чистая функция: доменные данные -> ноды и рёбра React Flow.
 export function mapToFlow(persons: Person[], relationships: Relationship[]) {

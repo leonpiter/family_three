@@ -3,7 +3,7 @@ import { Modal } from '../../components/ui/Modal'
 import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
 import { STR } from '../../lib/strings'
-import type { Gender, Person } from '../../types/domain'
+import type { Gender } from '../../types/domain'
 import type { PersonInput } from './boardStore'
 
 const emptyInput: PersonInput = {
@@ -29,24 +29,11 @@ export function PersonDialog({
 }: {
   title: string
   submitLabel: string
-  initial?: Person
+  initial?: Partial<PersonInput>
   onSubmit: (values: PersonInput) => Promise<void>
   onClose: () => void
 }) {
-  const [values, setValues] = useState<PersonInput>(
-    initial
-      ? {
-          first_name: initial.first_name,
-          last_name: initial.last_name,
-          maiden_name: initial.maiden_name,
-          gender: initial.gender,
-          birth_date: initial.birth_date,
-          death_date: initial.death_date,
-          birth_place: initial.birth_place,
-          bio: initial.bio,
-        }
-      : emptyInput,
-  )
+  const [values, setValues] = useState<PersonInput>({ ...emptyInput, ...initial })
   const [busy, setBusy] = useState(false)
 
   const setField = <K extends keyof PersonInput>(key: K, value: PersonInput[K]) =>

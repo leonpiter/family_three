@@ -1,5 +1,12 @@
 import { useEffect, type ReactNode } from 'react'
 
+// Счётчик открытых модалок: Esc-координатор доски не должен закрывать
+// сайдбар/меню, пока Esc адресован модальному окну.
+let openCount = 0
+export function anyModalOpen(): boolean {
+  return openCount > 0
+}
+
 export function Modal({
   title,
   onClose,
@@ -10,11 +17,15 @@ export function Modal({
   children: ReactNode
 }) {
   useEffect(() => {
+    openCount++
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
     }
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    return () => {
+      openCount--
+      window.removeEventListener('keydown', onKey)
+    }
   }, [onClose])
 
   return (
