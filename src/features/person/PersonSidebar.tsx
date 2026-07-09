@@ -62,10 +62,18 @@ export function PersonSidebar({
 
   return (
     <aside className="absolute inset-y-0 right-0 z-10 flex w-full flex-col border-l border-neutral-200 bg-white shadow-xl sm:w-95">
+      {/* Мобильный: крупная шапка «← Назад» */}
+      <button
+        onClick={onClose}
+        className="flex items-center gap-2 border-b border-neutral-200 px-4 py-3 text-left text-sm font-medium text-neutral-700 active:bg-neutral-100 sm:hidden"
+      >
+        <span className="text-lg">←</span> {STR.back}
+      </button>
+      {/* Десктоп: компактный × */}
       <button
         onClick={onClose}
         title={STR.close}
-        className="absolute right-3 top-3 z-10 flex h-7 w-7 items-center justify-center rounded-full text-lg text-neutral-400 hover:bg-neutral-100 hover:text-neutral-900"
+        className="absolute right-3 top-3 z-10 hidden h-7 w-7 items-center justify-center rounded-full text-lg text-neutral-400 hover:bg-neutral-100 hover:text-neutral-900 sm:flex"
       >
         ×
       </button>

@@ -10,8 +10,9 @@ export interface MenuItem {
 
 const MENU_W = 224 // соответствует w-56
 
+// py крупнее на тач-устройствах: мишень ≥ 44px
 const itemCls =
-  'flex w-full items-center justify-between px-3 py-1.5 text-left hover:bg-emerald-50 disabled:cursor-default disabled:text-neutral-400 disabled:hover:bg-transparent'
+  'flex w-full items-center justify-between px-3 py-2.5 text-left hover:bg-emerald-50 disabled:cursor-default disabled:text-neutral-400 disabled:hover:bg-transparent sm:py-1.5'
 
 export function ContextMenu({
   x,

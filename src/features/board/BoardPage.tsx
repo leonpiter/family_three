@@ -27,6 +27,7 @@ import { useAvatars } from '../photos/useAvatars'
 import { exportToExcel } from '../export/exportExcel'
 import { Modal, anyModalOpen } from '../../components/ui/Modal'
 import { useAuthStore } from '../auth/authStore'
+import { useIsTouch } from '../../hooks/useIsTouch'
 import { getParents } from '../../lib/relations'
 import { fullName, personToInput } from '../../lib/person'
 import { canEditPerson } from '../../lib/permissions'
@@ -52,6 +53,7 @@ function Board() {
   const selectedPersonId = useBoardStore((s) => s.selectedPersonId)
   const selectPerson = useBoardStore((s) => s.selectPerson)
   const profile = useAuthStore((s) => s.profile)
+  const isTouch = useIsTouch()
   const { screenToFlowPosition, getIntersectingNodes } = useReactFlow()
 
   const [nodes, setNodes, onNodesChange] = useNodesState<PersonFlowNode>([])
@@ -148,6 +150,8 @@ function Board() {
     })
 
     return [
+      // На тач-устройстве карточка открывается из меню (тап по ноде = меню)
+      ...(isTouch ? [{ label: STR.openCard, onClick: () => selectPerson(ego.id) }] : []),
       {
         label: STR.addRelativeMenu,
         submenu: [
@@ -208,14 +212,17 @@ function Board() {
           if (c.source && c.target && c.source !== c.target)
             setPendingConn({ source: c.source, target: c.target })
         }}
-        onNodeClick={(_e, node) => {
+        onNodeClick={(e, node) => {
           closeOverlays()
           if (linkFrom) {
             if (node.id !== linkFrom) setPendingConn({ source: linkFrom, target: node.id })
             setLinkFrom(null)
             return
           }
-          selectPerson(node.id)
+          // Мобильный: тап открывает контекстное меню (в нём — «Открыть карточку»
+          // и все действия). Десктоп: тап открывает сайдбар.
+          if (isTouch) setMenu({ x: e.clientX, y: e.clientY, personId: node.id })
+          else selectPerson(node.id)
         }}
         onNodeContextMenu={(e, node) => {
           e.preventDefault()
@@ -259,7 +266,8 @@ function Board() {
             return g === 'm' ? '#bae6fd' : g === 'f' ? '#fecdd3' : '#e5e7eb'
           }}
         />
-        <Panel position="top-left" className="flex gap-2">
+        {/* Десктоп: текстовая панель сверху слева */}
+        <Panel position="top-left" className="hidden gap-2 sm:flex">
           <Button onClick={addAtCenter}>{STR.addPerson}</Button>
           <Button
             variant="secondary"
@@ -268,6 +276,23 @@ function Board() {
           >
             {STR.exportExcel}
           </Button>
+        </Panel>
+        {/* Мобильный: FAB «+» и круглый экспорт снизу справа */}
+        <Panel position="bottom-right" className="flex flex-col gap-3 sm:hidden">
+          <button
+            aria-label={STR.exportExcel}
+            onClick={() => void exportToExcel(persons, relationships)}
+            className="flex h-12 w-12 items-center justify-center rounded-full border border-neutral-300 bg-white text-xl shadow-lg active:bg-neutral-100"
+          >
+            ⤓
+          </button>
+          <button
+            aria-label={STR.addPerson}
+            onClick={addAtCenter}
+            className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-700 text-3xl text-white shadow-lg active:bg-emerald-800"
+          >
+            +
+          </button>
         </Panel>
         {linkFrom && (
           <Panel position="top-center">
