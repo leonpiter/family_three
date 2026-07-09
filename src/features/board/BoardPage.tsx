@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import {
   Background,
   BackgroundVariant,
+  ConnectionMode,
   Controls,
   MiniMap,
   Panel,
@@ -215,6 +216,7 @@ function Board() {
           else selectPerson(null)
         }}
         onMoveStart={closeOverlays}
+        connectionMode={ConnectionMode.Loose}
         fitView
         fitViewOptions={{ padding: 0.4, maxZoom: 1 }}
         minZoom={0.1}

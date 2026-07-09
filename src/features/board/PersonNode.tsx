@@ -18,9 +18,24 @@ export function PersonNode({ data, selected }: NodeProps<PersonFlowNode>) {
 
   return (
     <div className="group flex w-28 flex-col items-center">
-      <Handle type="target" position={Position.Top} className={handleCls} />
+      <Handle id="t" type="target" position={Position.Top} className={handleCls} />
+      {/* Боковые точки на уровне центра круга — для горизонтальных линий супругов */}
+      <Handle
+        id="l"
+        type="source"
+        position={Position.Left}
+        style={{ top: 44 }}
+        className={handleCls}
+      />
+      <Handle
+        id="r"
+        type="source"
+        position={Position.Right}
+        style={{ top: 44 }}
+        className={handleCls}
+      />
       <div
-        className={`flex h-[88px] w-[88px] items-center justify-center overflow-hidden rounded-full border-2 text-2xl font-semibold shadow-sm ${circleClass(p.gender)} ${ring}`}
+        className={`flex h-22 w-22 items-center justify-center overflow-hidden rounded-full border-2 text-2xl font-semibold shadow-sm ${circleClass(p.gender)} ${ring}`}
       >
         {data.avatarUrl ? (
           <img
@@ -37,7 +52,7 @@ export function PersonNode({ data, selected }: NodeProps<PersonFlowNode>) {
         {fullName(p)}
       </div>
       {years && <div className="text-[10px] text-neutral-400">{years}</div>}
-      <Handle type="source" position={Position.Bottom} className={handleCls} />
+      <Handle id="b" type="source" position={Position.Bottom} className={handleCls} />
     </div>
   )
 }

@@ -9,6 +9,8 @@ export type PersonFlowNode = Node<
 
 // Чистая функция: доменные данные -> ноды и рёбра React Flow.
 export function mapToFlow(persons: Person[], relationships: Relationship[]) {
+  const byId = new Map(persons.map((p) => [p.id, p]))
+
   const nodes: PersonFlowNode[] = persons.map((p) => ({
     id: p.id,
     type: 'person' as const,
@@ -16,12 +18,30 @@ export function mapToFlow(persons: Person[], relationships: Relationship[]) {
     data: { person: p },
   }))
 
-  const edges: Edge[] = relationships.map((r) => ({
-    id: r.id,
-    source: r.from_person_id,
-    target: r.to_person_id,
-    ...(r.type === 'parent' ? parentEdgeProps : spouseEdgeProps),
-  }))
+  const edges: Edge[] = relationships.map((r) => {
+    if (r.type === 'parent') {
+      return {
+        id: r.id,
+        source: r.from_person_id,
+        target: r.to_person_id,
+        sourceHandle: 'b',
+        targetHandle: 't',
+        ...parentEdgeProps,
+      }
+    }
+    // Супруги: горизонтальная линия между обращёнными друг к другу боками
+    const from = byId.get(r.from_person_id)
+    const to = byId.get(r.to_person_id)
+    const fromIsLeft = (from?.pos_x ?? 0) <= (to?.pos_x ?? 0)
+    return {
+      id: r.id,
+      source: r.from_person_id,
+      target: r.to_person_id,
+      sourceHandle: fromIsLeft ? 'r' : 'l',
+      targetHandle: fromIsLeft ? 'l' : 'r',
+      ...spouseEdgeProps,
+    }
+  })
 
   return { nodes, edges }
 }

@@ -43,7 +43,7 @@ describe('mapToFlow', () => {
     expect(nodes[0].data.person.first_name).toBe('Имя')
   })
 
-  it('родительское ребро — smoothstep со стрелкой от родителя к ребёнку', () => {
+  it('родительское ребро — smoothstep со стрелкой: низ родителя -> верх ребёнка', () => {
     const { edges } = mapToFlow(
       [person('a'), person('b')],
       [rel('r1', 'a', 'b', 'parent')],
@@ -53,6 +53,8 @@ describe('mapToFlow', () => {
     expect(edges[0].target).toBe('b')
     expect(edges[0].type).toBe('smoothstep')
     expect(edges[0].markerEnd).toBeDefined()
+    expect(edges[0].sourceHandle).toBe('b')
+    expect(edges[0].targetHandle).toBe('t')
   })
 
   it('супружеское ребро — пунктирная прямая без стрелки', () => {
@@ -63,6 +65,23 @@ describe('mapToFlow', () => {
     expect(edges[0].type).toBe('straight')
     expect(edges[0].style?.strokeDasharray).toBeDefined()
     expect(edges[0].markerEnd).toBeUndefined()
+  })
+
+  it('супруги соединяются обращёнными боками (горизонтальная линия)', () => {
+    // a слева от b: линия из правого бока a в левый бок b
+    const left = mapToFlow(
+      [person('a', { pos_x: 0 }), person('b', { pos_x: 300 })],
+      [rel('r1', 'a', 'b', 'spouse')],
+    )
+    expect(left.edges[0].sourceHandle).toBe('r')
+    expect(left.edges[0].targetHandle).toBe('l')
+    // a справа от b: наоборот
+    const right = mapToFlow(
+      [person('a', { pos_x: 300 }), person('b', { pos_x: 0 })],
+      [rel('r1', 'a', 'b', 'spouse')],
+    )
+    expect(right.edges[0].sourceHandle).toBe('l')
+    expect(right.edges[0].targetHandle).toBe('r')
   })
 
   it('ребро использует id связи (для последующего удаления)', () => {
