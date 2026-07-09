@@ -24,6 +24,7 @@ import { EdgePopover } from './EdgePopover'
 import { linkByRole, roleGender, rolePosition, type RelativeRole } from './addRelative'
 import { PersonSidebar } from '../person/PersonSidebar'
 import { useAvatars } from '../photos/useAvatars'
+import { exportToExcel } from '../export/exportExcel'
 import { anyModalOpen } from '../../components/ui/Modal'
 import { getParents } from '../../lib/relations'
 import { personToInput } from '../../lib/person'
@@ -237,8 +238,15 @@ function Board() {
             return g === 'm' ? '#bae6fd' : g === 'f' ? '#fecdd3' : '#e5e7eb'
           }}
         />
-        <Panel position="top-left">
+        <Panel position="top-left" className="flex gap-2">
           <Button onClick={addAtCenter}>{STR.addPerson}</Button>
+          <Button
+            variant="secondary"
+            className="bg-white"
+            onClick={() => void exportToExcel(persons, relationships)}
+          >
+            {STR.exportExcel}
+          </Button>
         </Panel>
         {linkFrom && (
           <Panel position="top-center">

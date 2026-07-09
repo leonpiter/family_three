@@ -109,6 +109,8 @@ export const STR = {
   nothingFound: 'Никого не нашлось',
   close: 'Закрыть',
 
+  exportExcel: 'Экспорт в Excel',
+
   // Фотографии
   photosTitle: 'Фотографии',
   uploadHintDrop: 'Перетащите фото сюда или ',
