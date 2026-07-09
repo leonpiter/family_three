@@ -64,8 +64,12 @@ returns trigger
 language plpgsql security definer set search_path = public
 as $$
 begin
+  -- auth.uid() is null — прямой SQL из дашборда (роль postgres/service),
+  -- не через публичный API: разрешаем (нужно для бутстрапа первого админа).
+  -- Анонимные запросы через API сюда не доберутся — их отсекает RLS.
   if (old.status is distinct from new.status
       or old.role is distinct from new.role)
+     and auth.uid() is not null
      and not public.is_admin() then
     raise exception 'Only admin can change status or role';
   end if;
