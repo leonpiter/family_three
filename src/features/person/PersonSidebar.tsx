@@ -57,7 +57,7 @@ export function PersonSidebar({
     ) : null
 
   return (
-    <aside className="absolute inset-y-0 right-0 z-10 flex w-[380px] flex-col border-l border-neutral-200 bg-white shadow-xl">
+    <aside className="absolute inset-y-0 right-0 z-10 flex w-full flex-col border-l border-neutral-200 bg-white shadow-xl sm:w-95">
       <button
         onClick={onClose}
         title={STR.close}

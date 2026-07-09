@@ -227,6 +227,7 @@ function Board() {
         <MiniMap
           pannable
           zoomable
+          className="hidden md:block"
           nodeColor={(n) => {
             const g = (n.data as { person?: Person }).person?.gender
             return g === 'm' ? '#bae6fd' : g === 'f' ? '#fecdd3' : '#e5e7eb'

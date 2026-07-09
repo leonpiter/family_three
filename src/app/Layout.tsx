@@ -8,10 +8,10 @@ export function Layout() {
 
   return (
     <div className="flex h-screen flex-col bg-neutral-50">
-      <header className="flex items-center justify-between border-b border-neutral-200 bg-white px-4 py-2.5">
-        <div className="flex items-center gap-5">
-          <Link to="/" className="text-base font-semibold text-neutral-900">
-            🌳 {STR.appName}
+      <header className="flex items-center justify-between gap-2 border-b border-neutral-200 bg-white px-3 py-2.5 sm:px-4">
+        <div className="flex min-w-0 items-center gap-3 sm:gap-5">
+          <Link to="/" className="shrink-0 text-base font-semibold text-neutral-900">
+            🌳 <span className="hidden sm:inline">{STR.appName}</span>
           </Link>
           {profile?.role === 'admin' && (
             <NavLink
@@ -24,8 +24,8 @@ export function Layout() {
             </NavLink>
           )}
         </div>
-        <div className="flex items-center gap-3 text-sm">
-          <span className="text-neutral-600">{profile?.display_name}</span>
+        <div className="flex shrink-0 items-center gap-3 text-sm">
+          <span className="hidden text-neutral-600 sm:inline">{profile?.display_name}</span>
           <button
             onClick={() => void signOut()}
             className="text-neutral-400 transition-colors hover:text-neutral-900"

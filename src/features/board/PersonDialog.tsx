@@ -53,7 +53,7 @@ export function PersonDialog({
   return (
     <Modal title={title} onClose={onClose}>
       <form onSubmit={(e) => void submit(e)} className="space-y-3">
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Field
             label={STR.firstName}
             value={values.first_name}
@@ -67,7 +67,7 @@ export function PersonDialog({
             onChange={(e) => setField('middle_name', orNull(e.target.value))}
           />
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Field
             label={STR.lastName}
             value={values.last_name ?? ''}

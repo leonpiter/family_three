@@ -5,3 +5,10 @@
 .linking .react-flow__node {
   cursor: crosshair !important;
 }
+
+/* Тач-устройства: hover не существует — точки-коннекторы видимы всегда */
+@media (hover: none) {
+  .react-flow__handle {
+    opacity: 0.55 !important;
+  }
+}
