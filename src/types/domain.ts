@@ -24,11 +24,22 @@ export interface Person {
   birth_place: string | null
   bio: string | null
   user_id: string | null
+  avatar_photo_id: string | null
   pos_x: number
   pos_y: number
   created_by: string | null
   created_at: string
   updated_at: string
+}
+
+export interface Photo {
+  id: string
+  person_id: string
+  storage_path: string
+  thumb_path: string
+  caption: string | null
+  uploaded_by: string | null
+  created_at: string
 }
 
 export interface Relationship {

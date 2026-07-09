@@ -20,9 +20,18 @@ export function PersonNode({ data, selected }: NodeProps<PersonFlowNode>) {
     <div className="group flex w-28 flex-col items-center">
       <Handle type="target" position={Position.Top} className={handleCls} />
       <div
-        className={`flex h-[88px] w-[88px] items-center justify-center rounded-full border-2 text-2xl font-semibold shadow-sm ${circleClass(p.gender)} ${ring}`}
+        className={`flex h-[88px] w-[88px] items-center justify-center overflow-hidden rounded-full border-2 text-2xl font-semibold shadow-sm ${circleClass(p.gender)} ${ring}`}
       >
-        {initialsOf(p)}
+        {data.avatarUrl ? (
+          <img
+            src={data.avatarUrl}
+            alt={fullName(p)}
+            draggable={false}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          initialsOf(p)
+        )}
       </div>
       <div className="mt-1.5 max-w-full text-center text-xs font-medium leading-tight text-neutral-800">
         {fullName(p)}

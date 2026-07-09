@@ -106,6 +106,19 @@ export const STR = {
   nothingFound: 'Никого не нашлось',
   close: 'Закрыть',
 
+  // Фотографии
+  photosTitle: 'Фотографии',
+  uploadHintDrop: 'Перетащите фото сюда или ',
+  chooseFiles: 'выберите файлы',
+  setAvatar: 'Сделать аватаром',
+  avatarSet: 'Аватар обновлён',
+  captionLabel: 'Подпись',
+  deletePhoto: 'Удалить фото',
+  noPhotos: 'Пока нет фотографий',
+  fileTooLarge: 'Файл больше 15 МБ',
+  notAnImage: 'Это не изображение',
+  uploadError: 'Не удалось загрузить фото',
+
   // Общее
   saved: 'Сохранено',
   loadError: 'Не удалось загрузить данные',
@@ -125,4 +138,5 @@ export const fmt = {
   parentOf: (parent: string, child: string) => `${parent} — родитель: ${child}`,
   spousePair: (a: string, b: string) => `${a} и ${b} — супруги`,
   kinOf: (name: string, term: string, other: string) => `${name} — ${term}: ${other}`,
+  uploading: (done: number, total: number) => `Загрузка ${done} из ${total}…`,
 }

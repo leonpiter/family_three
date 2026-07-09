@@ -22,6 +22,7 @@ import { ContextMenu, type MenuItem } from './ContextMenu'
 import { EdgePopover } from './EdgePopover'
 import { linkByRole, roleGender, rolePosition, type RelativeRole } from './addRelative'
 import { PersonSidebar } from '../person/PersonSidebar'
+import { useAvatars } from '../photos/useAvatars'
 import { anyModalOpen } from '../../components/ui/Modal'
 import { getParents } from '../../lib/relations'
 import { personToInput } from '../../lib/person'
@@ -96,6 +97,8 @@ function Board() {
     [relationships],
   )
 
+  const avatars = useAvatars(persons)
+
   if (loading && !loaded) return <FullScreenSpinner />
 
   const closeOverlays = () => {
@@ -147,12 +150,13 @@ function Board() {
     ]
   }
 
-  // Подсветка цели при перетаскивании несвязанной ноды
-  const displayNodes = dropTargetId
-    ? nodes.map((n) =>
-        n.id === dropTargetId ? { ...n, data: { ...n.data, dropTarget: true } } : n,
-      )
-    : nodes
+  // Аватары + подсветка цели при перетаскивании несвязанной ноды
+  const displayNodes = nodes.map((n) => {
+    const avatarUrl = avatars.get(n.id)
+    const dropTarget = n.id === dropTargetId
+    if (!avatarUrl && !dropTarget) return n
+    return { ...n, data: { ...n.data, avatarUrl, dropTarget } }
+  })
 
   const editPerson = editPersonId ? persons[editPersonId] : null
   const addRelEgo = addRel ? persons[addRel.egoId] : null
@@ -250,6 +254,7 @@ function Board() {
       {selectedPersonId && persons[selectedPersonId] && (
         <PersonSidebar
           person={persons[selectedPersonId]}
+          avatarUrl={avatars.get(selectedPersonId)}
           onClose={() => selectPerson(null)}
           onRequestLink={(targetId) =>
             setPendingConn({ source: selectedPersonId, target: targetId })

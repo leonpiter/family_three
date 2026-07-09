@@ -13,6 +13,7 @@ const person = (id: string, over: Partial<Person> = {}): Person => ({
   birth_place: null,
   bio: null,
   user_id: null,
+  avatar_photo_id: null,
   pos_x: 0,
   pos_y: 0,
   created_by: null,

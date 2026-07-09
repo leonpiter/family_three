@@ -7,6 +7,7 @@ import { useAuthStore } from '../auth/authStore'
 import { PersonDialog } from '../board/PersonDialog'
 import { PersonPickerDialog } from './PersonPickerDialog'
 import { KinshipList } from './KinshipList'
+import { PhotoAlbum } from '../photos/PhotoAlbum'
 import { circleClass, initialsOf } from '../../lib/avatar'
 import { fullName, lifeYears, personToInput } from '../../lib/person'
 import { STR } from '../../lib/strings'
@@ -17,13 +18,15 @@ dayjs.locale('ru')
 
 const fmtDate = (d: string) => dayjs(d).format('D MMMM YYYY')
 
-// Правая панель с карточкой человека: поля, родство, (фото — далее в спринте).
+// Правая панель с карточкой человека: поля, родство, фотоальбом.
 export function PersonSidebar({
   person,
+  avatarUrl,
   onClose,
   onRequestLink,
 }: {
   person: Person
+  avatarUrl?: string
   onClose: () => void
   onRequestLink: (targetId: string) => void
 }) {
@@ -66,9 +69,13 @@ export function PersonSidebar({
       <div className="flex-1 overflow-y-auto p-5">
         <div className="flex flex-col items-center text-center">
           <div
-            className={`flex h-24 w-24 items-center justify-center rounded-full border-2 text-3xl font-semibold ${circleClass(person.gender)}`}
+            className={`flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 text-3xl font-semibold ${circleClass(person.gender)}`}
           >
-            {initialsOf(person)}
+            {avatarUrl ? (
+              <img src={avatarUrl} alt={fullName(person)} className="h-full w-full object-cover" />
+            ) : (
+              initialsOf(person)
+            )}
           </div>
           <div className="mt-2 text-base font-semibold text-neutral-900">
             {fullName(person)}
@@ -100,6 +107,10 @@ export function PersonSidebar({
             onNavigate={navigate}
             onAddLink={() => setPickerOpen(true)}
           />
+        </div>
+
+        <div className="mt-6 border-t border-neutral-100 pt-4">
+          <PhotoAlbum person={person} />
         </div>
       </div>
 

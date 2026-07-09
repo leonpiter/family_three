@@ -25,7 +25,10 @@ interface BoardState {
   selectPerson: (id: string | null) => void
   loadAll: () => Promise<void>
   createPerson: (input: PersonInput & { pos_x: number; pos_y: number }) => Promise<Person | null>
-  updatePerson: (id: string, patch: Partial<PersonInput>) => Promise<void>
+  updatePerson: (
+    id: string,
+    patch: Partial<PersonInput> & { avatar_photo_id?: string | null },
+  ) => Promise<void>
   movePersons: (moves: { id: string; x: number; y: number }[]) => void
   addRelationship: (fromId: string, toId: string, type: RelType) => Promise<void>
   removeRelationship: (id: string) => Promise<void>
