@@ -11,7 +11,7 @@ import { EditRequests } from './EditRequests'
 import { PhotoAlbum } from '../photos/PhotoAlbum'
 import { canEditPerson } from '../../lib/permissions'
 import { circleClass, initialsOf } from '../../lib/avatar'
-import { fullName, fullNameLong, lifeYears, personToInput } from '../../lib/person'
+import { ageInfo, fullName, fullNameLong, lifeYears, personToInput } from '../../lib/person'
 import { STR } from '../../lib/strings'
 import { Button } from '../../components/ui/Button'
 import type { Person } from '../../types/domain'
@@ -96,6 +96,9 @@ export function PersonSidebar({
             )}
           </div>
           {years && <div className="text-sm text-neutral-400">{years}</div>}
+          {ageInfo(person) && (
+            <div className="text-xs text-neutral-400">{ageInfo(person)}</div>
+          )}
           {isYou && (
             <span className="mt-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">
               {STR.youBadge}

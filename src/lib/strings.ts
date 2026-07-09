@@ -115,6 +115,7 @@ export const STR = {
 
   exportExcel: 'Экспорт в Excel',
   autoLayout: 'Разложить как дерево',
+  birthdaysTitle: 'Дни рождения',
   exportPng: 'Скачать картинкой',
   search: 'Поиск',
   layoutDone: 'Дерево разложено',

@@ -24,6 +24,7 @@ import { ContextMenu, type MenuItem } from './ContextMenu'
 import { EdgePopover } from './EdgePopover'
 import { linkByRole, roleGender, rolePosition, type RelativeRole } from './addRelative'
 import { computeTreeLayout } from './autoLayout'
+import { BirthdaysPanel } from './BirthdaysPanel'
 import { PersonSidebar } from '../person/PersonSidebar'
 import { PersonPickerDialog } from '../person/PersonPickerDialog'
 import { useAvatars } from '../photos/useAvatars'
@@ -384,6 +385,9 @@ function Board() {
           >
             +
           </button>
+        </Panel>
+        <Panel position="top-right" className="hidden sm:block">
+          <BirthdaysPanel onPick={goToPerson} />
         </Panel>
         {linkFrom && (
           <Panel position="top-center">

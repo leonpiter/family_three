@@ -32,3 +32,50 @@ export function lifeYears(p: Person): string {
   if (d) return `ум. ${d}`
   return ''
 }
+
+// Полных лет между двумя датами (или до сегодня).
+function fullYearsBetween(from: Date, to: Date): number {
+  let age = to.getFullYear() - from.getFullYear()
+  const m = to.getMonth() - from.getMonth()
+  if (m < 0 || (m === 0 && to.getDate() < from.getDate())) age--
+  return age
+}
+
+// Русское склонение «лет/год/года».
+function yearsWord(n: number): string {
+  const mod10 = n % 10
+  const mod100 = n % 100
+  if (mod10 === 1 && mod100 !== 11) return 'год'
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return 'года'
+  return 'лет'
+}
+
+// Возрастная строка для карточки: живой возраст, прожитые годы для ушедших
+// и «было бы N» на текущую дату. `now` инъектируется для тестируемости.
+export function ageInfo(p: Person, now: Date = new Date()): string | null {
+  if (!p.birth_date) return null
+  const birth = new Date(p.birth_date)
+  if (p.death_date) {
+    const death = new Date(p.death_date)
+    const lived = fullYearsBetween(birth, death)
+    const wouldBe = fullYearsBetween(birth, now)
+    return `прожил(а) ${lived} ${yearsWord(lived)} · было бы ${wouldBe}`
+  }
+  const age = fullYearsBetween(birth, now)
+  return `${age} ${yearsWord(age)}`
+}
+
+// Ближайший день рождения (только для живых): дней до, дата, исполнится лет.
+export function nextBirthday(
+  p: Person,
+  now: Date = new Date(),
+): { inDays: number; turns: number; date: Date } | null {
+  if (!p.birth_date || p.death_date) return null
+  const birth = new Date(p.birth_date)
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  let next = new Date(now.getFullYear(), birth.getMonth(), birth.getDate())
+  if (next < today) next = new Date(now.getFullYear() + 1, birth.getMonth(), birth.getDate())
+  const inDays = Math.round((next.getTime() - today.getTime()) / 86_400_000)
+  const turns = next.getFullYear() - birth.getFullYear()
+  return { inDays, turns, date: next }
+}
