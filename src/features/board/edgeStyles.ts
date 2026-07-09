@@ -13,3 +13,10 @@ export const spouseEdgeProps: Partial<Edge> = {
   style: { stroke: '#c2410c', strokeWidth: 1.5, strokeDasharray: '6 4' },
   interactionWidth: 16,
 }
+
+// Бывшие супруги: блёклый редкий пунктир
+export const exSpouseEdgeProps: Partial<Edge> = {
+  type: 'straight',
+  style: { stroke: '#a3a3a3', strokeWidth: 1.5, strokeDasharray: '2 6' },
+  interactionWidth: 16,
+}

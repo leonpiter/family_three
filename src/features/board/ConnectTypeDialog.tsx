@@ -12,7 +12,7 @@ export function ConnectTypeDialog({
 }: {
   source: Person
   target: Person
-  onPick: (fromId: string, toId: string, type: RelType) => void
+  onPick: (fromId: string, toId: string, type: RelType, isEx?: boolean) => void
   onClose: () => void
 }) {
   const options: { label: string; act: () => void }[] = [
@@ -27,6 +27,10 @@ export function ConnectTypeDialog({
     {
       label: fmt.spousePair(fullName(source), fullName(target)),
       act: () => onPick(source.id, target.id, 'spouse'),
+    },
+    {
+      label: fmt.exSpousePair(fullName(source), fullName(target)),
+      act: () => onPick(source.id, target.id, 'spouse', true),
     },
   ]
 

@@ -11,7 +11,8 @@ export type KinStep = 'U' | 'D' | 'S' // вверх к родителю / вни
 export interface KinGraph {
   parents: Map<string, string[]> // childId -> parentIds
   children: Map<string, string[]> // parentId -> childIds
-  spouses: Map<string, string[]>
+  spouses: Map<string, string[]> // только действующие браки
+  exSpouses: Map<string, string[]> // бывшие: термин только напрямую, свойственники не считаются
 }
 
 export interface KinResult {
@@ -25,6 +26,7 @@ export function buildKinGraph(rels: Relationship[]): KinGraph {
   const parents = new Map<string, string[]>()
   const children = new Map<string, string[]>()
   const spouses = new Map<string, string[]>()
+  const exSpouses = new Map<string, string[]>()
   const push = (m: Map<string, string[]>, k: string, v: string) => {
     const arr = m.get(k)
     if (arr) arr.push(v)
@@ -35,11 +37,12 @@ export function buildKinGraph(rels: Relationship[]): KinGraph {
       push(parents, r.to_person_id, r.from_person_id)
       push(children, r.from_person_id, r.to_person_id)
     } else {
-      push(spouses, r.from_person_id, r.to_person_id)
-      push(spouses, r.to_person_id, r.from_person_id)
+      const target = r.is_ex ? exSpouses : spouses
+      push(target, r.from_person_id, r.to_person_id)
+      push(target, r.to_person_id, r.from_person_id)
     }
   }
-  return { parents, children, spouses }
+  return { parents, children, spouses, exSpouses }
 }
 
 interface Path {
@@ -240,6 +243,9 @@ function bestOf(paths: Path[], persons: Record<string, Person>): { path: Path; r
   return { path: best!.path, res: best!.res }
 }
 
+const exSpouseTerm = (g: Gender | null): string =>
+  g === 'm' ? 'бывший муж' : g === 'f' ? 'бывшая жена' : 'бывший супруг(а)'
+
 export function kinshipBetween(
   egoId: string,
   targetId: string,
@@ -248,9 +254,28 @@ export function kinshipBetween(
   maxDepth = 4,
 ): KinResult | null {
   const paths = enumeratePaths(egoId, graph, maxDepth).get(targetId)
-  if (!paths || paths.length === 0) return null
-  const { path, res } = bestOf(paths, persons)
-  return { personId: targetId, term: res.term, steps: path.steps, distance: path.steps.length }
+  const base =
+    paths && paths.length > 0
+      ? (() => {
+          const { path, res } = bestOf(paths, persons)
+          return {
+            personId: targetId,
+            term: res.term,
+            steps: path.steps,
+            distance: path.steps.length,
+          }
+        })()
+      : null
+  // Бывший супруг — прямой термин; кружного пути короче быть не может
+  if (graph.exSpouses.get(egoId)?.includes(targetId) && (!base || base.distance > 1)) {
+    return {
+      personId: targetId,
+      term: exSpouseTerm(genderOf(targetId, persons)),
+      steps: ['S'],
+      distance: 1,
+    }
+  }
+  return base
 }
 
 export function kinshipAll(
@@ -260,12 +285,25 @@ export function kinshipAll(
   maxDepth = 4,
 ): KinResult[] {
   const all = enumeratePaths(egoId, graph, maxDepth)
-  const out: KinResult[] = []
+  const byId = new Map<string, KinResult>()
   for (const [personId, paths] of all) {
     if (!persons[personId]) continue
     const { path, res } = bestOf(paths, persons)
-    out.push({ personId, term: res.term, steps: path.steps, distance: path.steps.length })
+    byId.set(personId, { personId, term: res.term, steps: path.steps, distance: path.steps.length })
   }
+  for (const exId of graph.exSpouses.get(egoId) ?? []) {
+    if (!persons[exId]) continue
+    const existing = byId.get(exId)
+    if (!existing || existing.distance > 1) {
+      byId.set(exId, {
+        personId: exId,
+        term: exSpouseTerm(genderOf(exId, persons)),
+        steps: ['S'],
+        distance: 1,
+      })
+    }
+  }
+  const out = [...byId.values()]
   out.sort((a, b) => a.distance - b.distance || a.term.localeCompare(b.term, 'ru'))
   return out
 }
@@ -278,7 +316,10 @@ export function relationshipSentence(
   const from = persons[rel.from_person_id]
   const to = persons[rel.to_person_id]
   if (!from || !to) return ''
-  if (rel.type === 'spouse') return fmt.spousePair(fullName(from), fullName(to))
+  if (rel.type === 'spouse')
+    return rel.is_ex
+      ? fmt.exSpousePair(fullName(from), fullName(to))
+      : fmt.spousePair(fullName(from), fullName(to))
   const term = from.gender === 'm' ? 'отец' : from.gender === 'f' ? 'мать' : 'родитель'
   return fmt.kinOf(fullName(from), term, fullName(to))
 }

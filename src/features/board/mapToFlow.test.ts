@@ -23,11 +23,18 @@ const person = (id: string, over: Partial<Person> = {}): Person => ({
   ...over,
 })
 
-const rel = (id: string, from: string, to: string, type: RelType): Relationship => ({
+const rel = (
+  id: string,
+  from: string,
+  to: string,
+  type: RelType,
+  isEx = false,
+): Relationship => ({
   id,
   from_person_id: from,
   to_person_id: to,
   type,
+  is_ex: isEx,
   created_at: '',
 })
 
@@ -82,6 +89,13 @@ describe('mapToFlow', () => {
     )
     expect(right.edges[0].sourceHandle).toBe('l')
     expect(right.edges[0].targetHandle).toBe('r')
+  })
+
+  it('бывшие супруги — блёклый пунктир, отличный от действующего брака', () => {
+    const current = mapToFlow([person('a'), person('b')], [rel('r1', 'a', 'b', 'spouse')])
+    const ex = mapToFlow([person('a'), person('b')], [rel('r1', 'a', 'b', 'spouse', true)])
+    expect(ex.edges[0].type).toBe('straight')
+    expect(ex.edges[0].style?.stroke).not.toBe(current.edges[0].style?.stroke)
   })
 
   it('ребро использует id связи (для последующего удаления)', () => {

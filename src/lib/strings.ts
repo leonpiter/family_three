@@ -92,6 +92,8 @@ export const STR = {
   hasMotherHint: 'Мать уже указана',
   deleteRelation: 'Удалить связь',
   confirmDelete: 'Точно удалить?',
+  markAsEx: 'Пометить как бывших',
+  unmarkAsEx: 'Снова супруги',
 
   // Сайдбар
   kinshipTitle: 'Родство',
@@ -138,6 +140,7 @@ export const STR = {
 export const fmt = {
   parentOf: (parent: string, child: string) => `${parent} — родитель: ${child}`,
   spousePair: (a: string, b: string) => `${a} и ${b} — супруги`,
+  exSpousePair: (a: string, b: string) => `${a} и ${b} — бывшие супруги`,
   kinOf: (name: string, term: string, other: string) => `${name} — ${term}: ${other}`,
   uploading: (done: number, total: number) => `Загрузка ${done} из ${total}…`,
 }

@@ -14,6 +14,7 @@ const rel = (from: string, to: string, type: RelType): Relationship => ({
   from_person_id: from,
   to_person_id: to,
   type,
+  is_ex: false,
   created_at: '',
 })
 

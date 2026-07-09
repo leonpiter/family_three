@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { relationshipSentence } from '../../lib/kinship'
+import { useBoardStore } from './boardStore'
 import { STR } from '../../lib/strings'
 import { Button } from '../../components/ui/Button'
 import type { Person, Relationship } from '../../types/domain'
@@ -22,6 +23,7 @@ export function EdgePopover({
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const [confirming, setConfirming] = useState(false)
+  const updateRelationship = useBoardStore((s) => s.updateRelationship)
 
   useEffect(() => {
     const onDown = (e: MouseEvent) => {
@@ -48,6 +50,14 @@ export function EdgePopover({
       style={{ left, top }}
     >
       <p className="text-sm text-neutral-800">{relationshipSentence(rel, persons)}</p>
+      {rel.type === 'spouse' && (
+        <button
+          className="mt-2 text-sm text-emerald-700 hover:underline"
+          onClick={() => void updateRelationship(rel.id, { is_ex: !rel.is_ex })}
+        >
+          {rel.is_ex ? STR.unmarkAsEx : STR.markAsEx}
+        </button>
+      )}
       <div className="mt-3 flex gap-2">
         {confirming ? (
           <>

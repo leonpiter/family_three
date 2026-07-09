@@ -31,7 +31,8 @@ interface BoardState {
     patch: Partial<PersonInput> & { avatar_photo_id?: string | null },
   ) => Promise<void>
   movePersons: (moves: { id: string; x: number; y: number }[]) => void
-  addRelationship: (fromId: string, toId: string, type: RelType) => Promise<void>
+  addRelationship: (fromId: string, toId: string, type: RelType, isEx?: boolean) => Promise<void>
+  updateRelationship: (id: string, patch: { is_ex: boolean }) => Promise<void>
   removeRelationship: (id: string) => Promise<void>
 }
 
@@ -120,13 +121,13 @@ export const useBoardStore = create<BoardState>((set, get) => ({
     }, 400)
   },
 
-  addRelationship: async (fromId, toId, type) => {
+  addRelationship: async (fromId, toId, type, isEx = false) => {
     let from = fromId
     let to = toId
     if (type === 'spouse') [from, to] = normalizeSpousePair(fromId, toId)
     const { data, error } = await supabase
       .from('relationships')
-      .insert({ from_person_id: from, to_person_id: to, type })
+      .insert({ from_person_id: from, to_person_id: to, type, is_ex: type === 'spouse' && isEx })
       .select()
       .single()
     if (error) {
@@ -136,6 +137,17 @@ export const useBoardStore = create<BoardState>((set, get) => ({
     }
     const rel = data as Relationship
     set((s) => ({ relationships: { ...s.relationships, [rel.id]: rel } }))
+  },
+
+  updateRelationship: async (id, patch) => {
+    const prev = get().relationships[id]
+    if (!prev) return
+    set((s) => ({ relationships: { ...s.relationships, [id]: { ...prev, ...patch } } }))
+    const { error } = await supabase.from('relationships').update(patch).eq('id', id)
+    if (error) {
+      set((s) => ({ relationships: { ...s.relationships, [id]: prev } }))
+      toast.error(STR.saveError)
+    }
   },
 
   removeRelationship: async (id) => {

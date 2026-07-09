@@ -48,5 +48,8 @@ export interface Relationship {
   from_person_id: string
   to_person_id: string
   type: RelType
+  // только для spouse: бывшие супруги (развод); пара уникальна независимо
+  // от статуса, повторный брак с тем же человеком = снятие пометки
+  is_ex: boolean
   created_at: string
 }

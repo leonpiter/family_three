@@ -23,11 +23,12 @@ const person = (id: string, gender: Gender | null, name = id): Person => ({
 })
 
 let relSeq = 0
-const rel = (from: string, to: string, type: RelType): Relationship => ({
+const rel = (from: string, to: string, type: RelType, isEx = false): Relationship => ({
   id: `r${relSeq++}`,
   from_person_id: from,
   to_person_id: to,
   type,
+  is_ex: isEx,
   created_at: '',
 })
 
@@ -214,6 +215,44 @@ describe('kinship: композиция и границы', () => {
     const g = buildKinGraph([rel('a', 'b', 'spouse'), rel('b', 'c', 'spouse')])
     expect(kinshipBetween('a', 'c', p, g)).toBeNull()
   })
+  it('бывшие супруги: термин есть, свойственники через бывший брак — нет', () => {
+    // ego -S(ex)- exWife; exWifeFather — отец exWife
+    const p = {
+      ego: person('ego', 'm'),
+      exWife: person('exWife', 'f'),
+      exWifeFather: person('exWifeFather', 'm'),
+    }
+    const g = buildKinGraph([
+      rel('ego', 'exWife', 'spouse', true),
+      rel('exWifeFather', 'exWife', 'parent'),
+    ])
+    expect(kinshipBetween('ego', 'exWife', p, g)?.term).toBe('бывшая жена')
+    expect(kinshipBetween('exWife', 'ego', p, g)?.term).toBe('бывший муж')
+    // экс-тесть не вычисляется — пути через бывший брак закрыты
+    expect(kinshipBetween('ego', 'exWifeFather', p, g)).toBeNull()
+  })
+
+  it('дети от разных браков — полукровные брат/сестра между собой', () => {
+    // отец papa: сын son1 от ex-брака с w1, дочь d2 от брака с w2
+    const p = {
+      papa: person('papa', 'm'),
+      w1: person('w1', 'f'),
+      w2: person('w2', 'f'),
+      son1: person('son1', 'm'),
+      d2: person('d2', 'f'),
+    }
+    const g = buildKinGraph([
+      rel('papa', 'w1', 'spouse', true),
+      rel('papa', 'w2', 'spouse'),
+      rel('papa', 'son1', 'parent'),
+      rel('w1', 'son1', 'parent'),
+      rel('papa', 'd2', 'parent'),
+      rel('w2', 'd2', 'parent'),
+    ])
+    expect(kinshipBetween('son1', 'd2', p, g)?.term).toBe('сестра')
+    expect(kinshipBetween('d2', 'son1', p, g)?.term).toBe('брат')
+  })
+
   it('пол не указан — нейтральные термины', () => {
     const p = { a: person('a', null), b: person('b', 'm'), c: person('c', null) }
     const g = buildKinGraph([rel('a', 'b', 'parent'), rel('b', 'c', 'spouse')])
@@ -243,5 +282,10 @@ describe('relationshipSentence', () => {
   })
   it('spouse-ребро', () => {
     expect(relationshipSentence(rel('ego', 'wife', 'spouse'), P)).toBe('ego и wife — супруги')
+  })
+  it('ex-spouse-ребро', () => {
+    expect(relationshipSentence(rel('ego', 'wife', 'spouse', true), P)).toBe(
+      'ego и wife — бывшие супруги',
+    )
   })
 })

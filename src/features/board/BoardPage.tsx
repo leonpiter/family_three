@@ -217,6 +217,8 @@ function Board() {
         }}
         onMoveStart={closeOverlays}
         connectionMode={ConnectionMode.Loose}
+        snapToGrid
+        snapGrid={[24, 24]}
         fitView
         fitViewOptions={{ padding: 0.4, maxZoom: 1 }}
         minZoom={0.1}
@@ -328,8 +330,8 @@ function Board() {
           source={persons[pendingConn.source]}
           target={persons[pendingConn.target]}
           onClose={() => setPendingConn(null)}
-          onPick={(fromId, toId, type) => {
-            void addRelationship(fromId, toId, type)
+          onPick={(fromId, toId, type, isEx) => {
+            void addRelationship(fromId, toId, type, isEx)
             setPendingConn(null)
           }}
         />
