@@ -1,10 +1,13 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useAuthStore } from '../features/auth/authStore'
+import { usePendingCount } from '../features/admin/usePendingCount'
 import { STR } from '../lib/strings'
 
 export function Layout() {
   const profile = useAuthStore((s) => s.profile)
   const signOut = useAuthStore((s) => s.signOut)
+  const isAdmin = profile?.role === 'admin'
+  const pending = usePendingCount(isAdmin)
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-neutral-50">
@@ -13,14 +16,25 @@ export function Layout() {
           <Link to="/" className="shrink-0 text-base font-semibold text-neutral-900">
             🌳 <span className="hidden sm:inline">{STR.appName}</span>
           </Link>
-          {profile?.role === 'admin' && (
+          {isAdmin && (
             <NavLink
               to="/admin"
               className={({ isActive }) =>
-                `text-sm ${isActive ? 'text-emerald-700 font-medium' : 'text-neutral-500 hover:text-neutral-900'}`
+                `flex items-center gap-1.5 text-sm ${isActive ? 'font-medium text-emerald-700' : 'text-neutral-500 hover:text-neutral-900'}`
               }
             >
-              {STR.adminNav}
+              {/* Колокольчик со счётчиком, когда есть ожидающие заявки */}
+              {pending > 0 && (
+                <span
+                  title={STR.pendingRequestsTitle}
+                  className="inline-flex items-center gap-0.5 rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-medium text-white"
+                >
+                  🔔 {pending}
+                </span>
+              )}
+              <span className="hidden sm:inline">{STR.adminNav}</span>
+              {/* На мобильном без счётчика показываем сам колокольчик как ярлык */}
+              {pending === 0 && <span className="sm:hidden">🔔</span>}
             </NavLink>
           )}
         </div>

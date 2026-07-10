@@ -48,6 +48,7 @@ export const STR = {
 
   // Admin
   adminNav: 'Заявки и участники',
+  pendingRequestsTitle: 'Ожидают одобрения',
   adminTitle: 'Участники',
   approve: 'Одобрить',
   reject: 'Отклонить',
