@@ -29,14 +29,21 @@ const emptyInput: PersonInput = {
 const inputCls =
   'w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600'
 
+// Список годов для выпадашки: от текущего вниз до 1850 (свежие — первыми).
+const CURRENT_YEAR = new Date().getFullYear()
+const YEARS = Array.from({ length: CURRENT_YEAR - 1849 }, (_, i) => CURRENT_YEAR - i)
+
 // Поле даты с переключателем «только год» (когда точная дата неизвестна).
+// В режиме года — ввод вручную ИЛИ выбор из выпадающего списка (datalist).
 function VitalField({
   label,
+  listId,
   value,
   precision,
   onChange,
 }: {
   label: string
+  listId: string
   value: string | null
   precision: DatePrecision
   onChange: (value: string | null, precision: DatePrecision) => void
@@ -56,18 +63,26 @@ function VitalField({
         </label>
       </div>
       {yearOnly ? (
-        <input
-          type="number"
-          min={1000}
-          max={2100}
-          placeholder={STR.yearPlaceholder}
-          value={value ? value.slice(0, 4) : ''}
-          onChange={(e) => {
-            const y = e.target.value.replace(/\D/g, '').slice(0, 4)
-            onChange(y ? `${y}-01-01` : null, 'year')
-          }}
-          className={inputCls}
-        />
+        <>
+          <input
+            type="text"
+            inputMode="numeric"
+            maxLength={4}
+            list={listId}
+            placeholder={STR.yearPlaceholder}
+            value={value ? value.slice(0, 4) : ''}
+            onChange={(e) => {
+              const y = e.target.value.replace(/\D/g, '').slice(0, 4)
+              onChange(y ? `${y}-01-01` : null, 'year')
+            }}
+            className={inputCls}
+          />
+          <datalist id={listId}>
+            {YEARS.map((y) => (
+              <option key={y} value={y} />
+            ))}
+          </datalist>
+        </>
       ) : (
         <input
           type="date"
@@ -155,6 +170,7 @@ export function PersonDialog({
         <div className="grid grid-cols-2 gap-3">
           <VitalField
             label={STR.birthDate}
+            listId="years-birth"
             value={values.birth_date}
             precision={values.birth_date_precision}
             onChange={(v, prec) =>
@@ -163,6 +179,7 @@ export function PersonDialog({
           />
           <VitalField
             label={STR.deathDate}
+            listId="years-death"
             value={values.death_date}
             precision={values.death_date_precision}
             onChange={(v, prec) =>
