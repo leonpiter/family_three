@@ -62,7 +62,8 @@ function Board() {
   const profile = useAuthStore((s) => s.profile)
   const session = useAuthStore((s) => s.session)
   const isTouch = useIsTouch()
-  const { screenToFlowPosition, getIntersectingNodes, setCenter, getNodes } = useReactFlow()
+  const { screenToFlowPosition, getIntersectingNodes, setCenter, getNodes, fitView } =
+    useReactFlow()
 
   const [nodes, setNodes, onNodesChange] = useNodesState<PersonFlowNode>([])
   const [edges, setEdges, onEdgesChange] = useEdgesState(mapToFlow([], []).edges)
@@ -168,8 +169,13 @@ function Board() {
     )
 
   const runAutoLayout = () => {
-    const positions = computeTreeLayout(Object.values(persons), Object.values(relationships))
+    const all = Object.values(persons)
+    if (all.length === 0) return
+    const positions = computeTreeLayout(all, Object.values(relationships))
     movePersons(positions.map((p) => ({ id: p.id, x: p.x, y: p.y })))
+    // Ноды обновятся на следующем рендере — затем подгоняем вид, чтобы всё
+    // разложенное дерево попало на экран (иначе оно может уехать за кадр).
+    window.setTimeout(() => void fitView({ duration: 600, padding: 0.2 }), 80)
     toast.success(STR.layoutDone)
   }
 
