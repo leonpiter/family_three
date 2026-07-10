@@ -25,6 +25,7 @@ import { EdgePopover } from './EdgePopover'
 import { linkByRole, roleGender, rolePosition, type RelativeRole } from './addRelative'
 import { computeTreeLayout } from './autoLayout'
 import { BirthdaysPanel } from './BirthdaysPanel'
+import { NodePreview } from './NodePreview'
 import { PersonSidebar } from '../person/PersonSidebar'
 import { PersonPickerDialog } from '../person/PersonPickerDialog'
 import { useAvatars } from '../photos/useAvatars'
@@ -79,7 +80,9 @@ function Board() {
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
   const [searchOpen, setSearchOpen] = useState(false)
   const [moreMenu, setMoreMenu] = useState<{ x: number; y: number } | null>(null)
+  const [preview, setPreview] = useState<{ personId: string; rect: DOMRect } | null>(null)
   const centeredOnSelf = useRef(false)
+  const previewTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -161,6 +164,8 @@ function Board() {
   const closeOverlays = () => {
     setMenu(null)
     setEdgePop(null)
+    if (previewTimer.current) clearTimeout(previewTimer.current)
+    setPreview(null)
   }
 
   const addAtCenter = () =>
@@ -334,7 +339,27 @@ function Board() {
         onNodeContextMenu={(e, node) => {
           e.preventDefault()
           setEdgePop(null)
+          setPreview(null)
           setMenu({ x: e.clientX, y: e.clientY, personId: node.id })
+        }}
+        onNodeMouseEnter={(e, node) => {
+          if (isTouch) return
+          const el = (e.target as HTMLElement).closest('.react-flow__node')
+          if (!el) return
+          const rect = el.getBoundingClientRect()
+          if (previewTimer.current) clearTimeout(previewTimer.current)
+          previewTimer.current = setTimeout(
+            () => setPreview({ personId: node.id, rect }),
+            350,
+          )
+        }}
+        onNodeMouseLeave={() => {
+          if (previewTimer.current) clearTimeout(previewTimer.current)
+          setPreview(null)
+        }}
+        onNodeDragStart={() => {
+          if (previewTimer.current) clearTimeout(previewTimer.current)
+          setPreview(null)
         }}
         onEdgeClick={(e, edge) => {
           closeOverlays()
@@ -463,6 +488,14 @@ function Board() {
           y={moreMenu.y}
           items={moreMenuItems()}
           onClose={() => setMoreMenu(null)}
+        />
+      )}
+
+      {preview && persons[preview.personId] && !menu && (
+        <NodePreview
+          person={persons[preview.personId]}
+          avatarUrl={avatars.get(preview.personId)}
+          rect={preview.rect}
         />
       )}
 

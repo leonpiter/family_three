@@ -11,22 +11,13 @@ import { EditRequests } from './EditRequests'
 import { PhotoAlbum } from '../photos/PhotoAlbum'
 import { canEditPerson } from '../../lib/permissions'
 import { circleClass, initialsOf } from '../../lib/avatar'
-import { ageInfo, fullName, fullNameLong, lifeYears, personToInput } from '../../lib/person'
+import { ageInfo, fullName, fullNameLong, lifeYears, militaryLabel, personToInput } from '../../lib/person'
 import { STR } from '../../lib/strings'
 import { Button } from '../../components/ui/Button'
 import { VeteranStar } from '../../components/ui/VeteranStar'
-import type { MilitaryStatus, Person } from '../../types/domain'
+import type { Person } from '../../types/domain'
 
 dayjs.locale('ru')
-
-const militaryLabel = (s: MilitaryStatus | null): string | null =>
-  s === 'not_served'
-    ? STR.militaryNotServed
-    : s === 'served'
-      ? STR.militaryServed
-      : s === 'fought'
-        ? STR.militaryFought
-        : null
 
 const fmtDate = (d: string) => dayjs(d).format('D MMMM YYYY')
 

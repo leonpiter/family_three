@@ -1,5 +1,16 @@
-import type { Person } from '../types/domain'
+import type { MilitaryStatus, Person } from '../types/domain'
 import type { PersonInput } from '../features/board/boardStore'
+import { STR } from './strings'
+
+export function militaryLabel(s: MilitaryStatus | null): string | null {
+  return s === 'not_served'
+    ? STR.militaryNotServed
+    : s === 'served'
+      ? STR.militaryServed
+      : s === 'fought'
+        ? STR.militaryFought
+        : null
+}
 
 export function personToInput(p: Person): PersonInput {
   return {
