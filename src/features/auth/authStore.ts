@@ -29,6 +29,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (initialized) return
     initialized = true
 
+    // Ссылка из письма восстановления помечена ?pwreset=1 — распознаём
+    // синхронно, до любых редиректов, и ведём на страницу нового пароля.
+    // (Событие PASSWORD_RECOVERY ниже — запасной путь.)
+    if (new URLSearchParams(window.location.search).get('pwreset') === '1') {
+      set({ passwordRecovery: true })
+    }
+
     const {
       data: { session },
     } = await supabase.auth.getSession()

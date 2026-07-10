@@ -17,10 +17,11 @@ export default function ForgotPasswordPage() {
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setBusy(true)
-    // redirectTo ведёт в приложение; supabase обменяет код и вызовет
-    // событие PASSWORD_RECOVERY → редирект на /new-password.
+    // redirectTo с собственным маркером ?pwreset=1 — приложение распознаёт его
+    // при старте и ведёт на страницу нового пароля (надёжно с HashRouter;
+    // не 'type', чтобы supabase-js не принял за свой служебный параметр).
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: siteUrl(),
+      redirectTo: `${siteUrl()}?pwreset=1`,
     })
     setBusy(false)
     if (error) {
