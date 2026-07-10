@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+/* Оболочка фиксированной высоты: без прокрутки и «резинки» body на мобильном,
+   чтобы шапка/панели не смещались при жестах и зуме доски. */
+html,
+body,
+#root {
+  height: 100%;
+}
+body {
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
+
 /* Режим «Связать с…»: перекрываем курсоры React Flow */
 .linking .react-flow__pane,
 .linking .react-flow__node {

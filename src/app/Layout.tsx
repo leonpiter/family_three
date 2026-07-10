@@ -7,8 +7,8 @@ export function Layout() {
   const signOut = useAuthStore((s) => s.signOut)
 
   return (
-    <div className="flex h-screen flex-col bg-neutral-50">
-      <header className="flex items-center justify-between gap-2 border-b border-neutral-200 bg-white px-3 py-2.5 sm:px-4">
+    <div className="flex h-dvh flex-col overflow-hidden bg-neutral-50">
+      <header className="z-20 flex shrink-0 items-center justify-between gap-2 border-b border-neutral-200 bg-white px-3 py-2.5 sm:px-4">
         <div className="flex min-w-0 items-center gap-3 sm:gap-5">
           <Link to="/" className="shrink-0 text-base font-semibold text-neutral-900">
             🌳 <span className="hidden sm:inline">{STR.appName}</span>
