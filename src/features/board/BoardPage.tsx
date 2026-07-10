@@ -25,7 +25,9 @@ import { EdgePopover } from './EdgePopover'
 import { linkByRole, roleGender, rolePosition, type RelativeRole } from './addRelative'
 import { computeTreeLayout } from './autoLayout'
 import { BirthdaysPanel } from './BirthdaysPanel'
+import { SurnamePanel } from './SurnamePanel'
 import { NodePreview } from './NodePreview'
+import { normalizeSurname } from '../../lib/surname'
 import { PersonSidebar } from '../person/PersonSidebar'
 import { PersonPickerDialog } from '../person/PersonPickerDialog'
 import { useAvatars } from '../photos/useAvatars'
@@ -81,6 +83,7 @@ function Board() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [moreMenu, setMoreMenu] = useState<{ x: number; y: number } | null>(null)
   const [preview, setPreview] = useState<{ personId: string; rect: DOMRect } | null>(null)
+  const [surnameFilter, setSurnameFilter] = useState<string | null>(null)
   const centeredOnSelf = useRef(false)
   const previewTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -289,12 +292,14 @@ function Board() {
     ]
   }
 
-  // Аватары + подсветка цели при перетаскивании несвязанной ноды
+  // Аватары, подсветка цели drop, затемнение при фильтре по фамилии
   const displayNodes = nodes.map((n) => {
     const avatarUrl = avatars.get(n.id)
     const dropTarget = n.id === dropTargetId
-    if (!avatarUrl && !dropTarget) return n
-    return { ...n, data: { ...n.data, avatarUrl, dropTarget } }
+    const dimmed =
+      surnameFilter != null && normalizeSurname(persons[n.id]?.last_name) !== surnameFilter
+    if (!avatarUrl && !dropTarget && !dimmed) return n
+    return { ...n, data: { ...n.data, avatarUrl, dropTarget, dimmed } }
   })
 
   const editPerson = editPersonId ? persons[editPersonId] : null
@@ -442,7 +447,8 @@ function Board() {
             +
           </button>
         </Panel>
-        <Panel position="top-right" className="hidden sm:block">
+        <Panel position="top-right" className="hidden w-56 flex-col gap-2 sm:flex">
+          <SurnamePanel selected={surnameFilter} onSelect={setSurnameFilter} />
           <BirthdaysPanel onPick={goToPerson} />
         </Panel>
         {linkFrom && (

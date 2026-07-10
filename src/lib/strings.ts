@@ -152,6 +152,8 @@ export const STR = {
   moreActions: 'Ещё',
   autoLayout: 'Разложить как дерево',
   birthdaysTitle: 'Дни рождения',
+  surnamesTitle: 'Фамильные линии',
+  showAllSurnames: '← Показать все',
   exportPng: 'Скачать картинкой',
   search: 'Поиск',
   layoutDone: 'Дерево разложено',
@@ -207,6 +209,7 @@ export const fmt = {
   kinOf: (name: string, term: string, other: string) => `${name} — ${term}: ${other}`,
   uploading: (done: number, total: number) => `Загрузка ${done} из ${total}…`,
   importDone: (p: number, r: number) => `Добавлено: ${p} чел., ${r} связей`,
+  surnameBranch: (surname: string) => `Ветка ${surname}`,
   deletePersonWarning: (name: string) =>
     `${name} будет удалён(а) вместе со всеми связями и фотографиями. Это действие нельзя отменить.`,
 }

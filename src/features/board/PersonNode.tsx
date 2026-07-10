@@ -1,6 +1,7 @@
 import { Handle, Position, type NodeProps } from '@xyflow/react'
 import { circleClass, initialsOf } from '../../lib/avatar'
 import { fullName, lifeYears } from '../../lib/person'
+import { surnameColor } from '../../lib/surname'
 import { VeteranStar } from '../../components/ui/VeteranStar'
 import type { PersonFlowNode } from './mapToFlow'
 
@@ -10,6 +11,7 @@ const handleCls =
 export function PersonNode({ data, selected }: NodeProps<PersonFlowNode>) {
   const p = data.person
   const years = lifeYears(p)
+  const sc = surnameColor(p.last_name) // цвет фамильной линии (рамка)
   // dropTarget — над этой нодой сейчас «висит» перетаскиваемая несвязанная нода
   const ring = data.dropTarget
     ? 'ring-4 ring-amber-400 ring-offset-2'
@@ -18,7 +20,9 @@ export function PersonNode({ data, selected }: NodeProps<PersonFlowNode>) {
       : ''
 
   return (
-    <div className="group flex w-28 flex-col items-center">
+    <div
+      className={`group flex w-28 flex-col items-center transition-opacity ${data.dimmed ? 'opacity-20' : ''}`}
+    >
       <Handle id="t" type="target" position={Position.Top} className={handleCls} />
       {/* Боковые точки на уровне центра круга — для горизонтальных линий супругов */}
       <Handle
@@ -37,7 +41,8 @@ export function PersonNode({ data, selected }: NodeProps<PersonFlowNode>) {
       />
       <div className="relative">
         <div
-          className={`flex h-22 w-22 items-center justify-center overflow-hidden rounded-full border-2 text-2xl font-semibold shadow-sm ${circleClass(p.gender)} ${ring}`}
+          className={`flex h-22 w-22 items-center justify-center overflow-hidden rounded-full border-[3px] text-2xl font-semibold shadow-sm ${circleClass(p.gender)} ${ring}`}
+          style={sc ? { borderColor: sc } : undefined}
         >
           {data.avatarUrl ? (
             <img

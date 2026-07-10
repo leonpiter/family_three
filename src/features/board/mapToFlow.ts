@@ -3,7 +3,7 @@ import type { Person, Relationship } from '../../types/domain'
 import { exSpouseEdgeProps, parentEdgeProps, spouseEdgeProps } from './edgeStyles'
 
 export type PersonFlowNode = Node<
-  { person: Person; dropTarget?: boolean; avatarUrl?: string },
+  { person: Person; dropTarget?: boolean; avatarUrl?: string; dimmed?: boolean },
   'person'
 >
 
