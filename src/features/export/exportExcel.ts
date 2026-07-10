@@ -1,9 +1,11 @@
 import dayjs from 'dayjs'
 import { getChildren, getParents, getSiblings, getSpouses } from '../../lib/relations'
 import { fullNameLong } from '../../lib/person'
-import type { Person, Relationship } from '../../types/domain'
+import type { DatePrecision, Person, Relationship } from '../../types/domain'
 
-const d = (v: string | null) => (v ? dayjs(v).format('DD.MM.YYYY') : '')
+// Точная дата — ДД.ММ.ГГГГ; приблизительная — только год.
+const d = (v: string | null, precision: DatePrecision = 'day') =>
+  !v ? '' : precision === 'year' ? v.slice(0, 4) : dayjs(v).format('DD.MM.YYYY')
 
 // Выгрузка всей базы в Excel: лист «Родственники» (каждый человек со своими
 // родителями/супругами/детьми по именам) + лист «Связи» (кто-кем-кому).
@@ -29,8 +31,8 @@ export async function exportToExcel(
     Отчество: p.middle_name ?? '',
     'Девичья фамилия': p.maiden_name ?? '',
     Пол: p.gender === 'm' ? 'муж.' : p.gender === 'f' ? 'жен.' : '',
-    'Дата рождения': d(p.birth_date),
-    'Дата смерти': d(p.death_date),
+    'Дата рождения': d(p.birth_date, p.birth_date_precision),
+    'Дата смерти': d(p.death_date, p.death_date_precision),
     'Место рождения': p.birth_place ?? '',
     'Где жил': p.residence ?? '',
     Образование: p.education ?? '',

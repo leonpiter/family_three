@@ -3,7 +3,7 @@ import { Modal } from '../../components/ui/Modal'
 import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
 import { STR } from '../../lib/strings'
-import type { Gender, MilitaryStatus } from '../../types/domain'
+import type { DatePrecision, Gender, MilitaryStatus } from '../../types/domain'
 import type { PersonInput } from './boardStore'
 
 const emptyInput: PersonInput = {
@@ -14,6 +14,8 @@ const emptyInput: PersonInput = {
   gender: null,
   birth_date: null,
   death_date: null,
+  birth_date_precision: 'day',
+  death_date_precision: 'day',
   birth_place: null,
   bio: null,
   education: null,
@@ -26,6 +28,57 @@ const emptyInput: PersonInput = {
 
 const inputCls =
   'w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600'
+
+// Поле даты с переключателем «только год» (когда точная дата неизвестна).
+function VitalField({
+  label,
+  value,
+  precision,
+  onChange,
+}: {
+  label: string
+  value: string | null
+  precision: DatePrecision
+  onChange: (value: string | null, precision: DatePrecision) => void
+}) {
+  const yearOnly = precision === 'year'
+  return (
+    <div>
+      <div className="mb-1 flex items-center justify-between">
+        <span className="text-sm text-neutral-600">{label}</span>
+        <label className="flex cursor-pointer items-center gap-1 text-xs text-neutral-500">
+          <input
+            type="checkbox"
+            checked={yearOnly}
+            onChange={(e) => onChange(value, e.target.checked ? 'year' : 'day')}
+          />
+          {STR.yearOnly}
+        </label>
+      </div>
+      {yearOnly ? (
+        <input
+          type="number"
+          min={1000}
+          max={2100}
+          placeholder={STR.yearPlaceholder}
+          value={value ? value.slice(0, 4) : ''}
+          onChange={(e) => {
+            const y = e.target.value.replace(/\D/g, '').slice(0, 4)
+            onChange(y ? `${y}-01-01` : null, 'year')
+          }}
+          className={inputCls}
+        />
+      ) : (
+        <input
+          type="date"
+          value={value ?? ''}
+          onChange={(e) => onChange(e.target.value || null, 'day')}
+          className={inputCls}
+        />
+      )}
+    </div>
+  )
+}
 
 export function PersonDialog({
   title,
@@ -100,17 +153,21 @@ export function PersonDialog({
           />
         )}
         <div className="grid grid-cols-2 gap-3">
-          <Field
+          <VitalField
             label={STR.birthDate}
-            type="date"
-            value={values.birth_date ?? ''}
-            onChange={(e) => setField('birth_date', orNull(e.target.value))}
+            value={values.birth_date}
+            precision={values.birth_date_precision}
+            onChange={(v, prec) =>
+              setValues((s) => ({ ...s, birth_date: v, birth_date_precision: prec }))
+            }
           />
-          <Field
+          <VitalField
             label={STR.deathDate}
-            type="date"
-            value={values.death_date ?? ''}
-            onChange={(e) => setField('death_date', orNull(e.target.value))}
+            value={values.death_date}
+            precision={values.death_date_precision}
+            onChange={(v, prec) =>
+              setValues((s) => ({ ...s, death_date: v, death_date_precision: prec }))
+            }
           />
         </div>
         <Field

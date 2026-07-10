@@ -11,6 +11,8 @@ const person = (id: string, over: Partial<Person> = {}): Person => ({
   gender: null,
   birth_date: null,
   death_date: null,
+  birth_date_precision: 'day',
+  death_date_precision: 'day',
   birth_place: null,
   bio: null,
   education: null,

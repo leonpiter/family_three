@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ageInfo, nextBirthday } from './person'
+import { ageInfo, formatVital, nextBirthday } from './person'
 import type { Person } from '../types/domain'
 
 const person = (over: Partial<Person>): Person => ({
@@ -11,6 +11,8 @@ const person = (over: Partial<Person>): Person => ({
   gender: null,
   birth_date: null,
   death_date: null,
+  birth_date_precision: 'day',
+  death_date_precision: 'day',
   birth_place: null,
   bio: null,
   education: null,
@@ -47,6 +49,31 @@ describe('ageInfo', () => {
   })
   it('без даты рождения — null', () => {
     expect(ageInfo(person({}), NOW)).toBeNull()
+  })
+  it('точность «год» — приблизительный возраст с ≈', () => {
+    expect(ageInfo(person({ birth_date: '1917-01-01', birth_date_precision: 'year' }), NOW)).toBe(
+      '≈109 лет',
+    )
+  })
+})
+
+describe('formatVital', () => {
+  it('точная дата — полный формат', () => {
+    expect(formatVital('1960-03-05', 'day')).toBe('5 марта 1960')
+  })
+  it('точность «год» — только год', () => {
+    expect(formatVital('1917-01-01', 'year')).toBe('1917')
+  })
+  it('пусто — null', () => {
+    expect(formatVital(null, 'day')).toBeNull()
+  })
+})
+
+describe('nextBirthday с точностью «год»', () => {
+  it('не считается для приблизительной даты', () => {
+    expect(
+      nextBirthday(person({ birth_date: '1984-07-20', birth_date_precision: 'year' }), NOW),
+    ).toBeNull()
   })
 })
 

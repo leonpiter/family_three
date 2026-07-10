@@ -1,7 +1,5 @@
 import { useState } from 'react'
 import { useReactFlow } from '@xyflow/react'
-import dayjs from 'dayjs'
-import 'dayjs/locale/ru'
 import { useBoardStore } from '../board/boardStore'
 import { useAuthStore } from '../auth/authStore'
 import { PersonDialog } from '../board/PersonDialog'
@@ -11,15 +9,19 @@ import { EditRequests } from './EditRequests'
 import { PhotoAlbum } from '../photos/PhotoAlbum'
 import { canEditPerson } from '../../lib/permissions'
 import { circleClass, initialsOf } from '../../lib/avatar'
-import { ageInfo, fullName, fullNameLong, lifeYears, militaryLabel, personToInput } from '../../lib/person'
+import {
+  ageInfo,
+  formatVital,
+  fullName,
+  fullNameLong,
+  lifeYears,
+  militaryLabel,
+  personToInput,
+} from '../../lib/person'
 import { STR } from '../../lib/strings'
 import { Button } from '../../components/ui/Button'
 import { VeteranStar } from '../../components/ui/VeteranStar'
 import type { Person } from '../../types/domain'
-
-dayjs.locale('ru')
-
-const fmtDate = (d: string) => dayjs(d).format('D MMMM YYYY')
 
 // Правая панель с карточкой человека: поля, родство, фотоальбом.
 export function PersonSidebar({
@@ -111,8 +113,8 @@ export function PersonSidebar({
         </div>
 
         <div className="mt-5 space-y-3">
-          {fieldRow(STR.birthDate, person.birth_date ? fmtDate(person.birth_date) : null)}
-          {fieldRow(STR.deathDate, person.death_date ? fmtDate(person.death_date) : null)}
+          {fieldRow(STR.birthDate, formatVital(person.birth_date, person.birth_date_precision))}
+          {fieldRow(STR.deathDate, formatVital(person.death_date, person.death_date_precision))}
           {fieldRow(STR.birthPlace, person.birth_place)}
           {fieldRow(STR.residence, person.residence)}
           {fieldRow(STR.education, person.education)}

@@ -80,6 +80,8 @@ export const STR = {
   genderUnset: 'Не указан',
   birthDate: 'Дата рождения',
   deathDate: 'Дата смерти',
+  yearOnly: 'только год',
+  yearPlaceholder: 'Год, напр. 1917',
   birthPlace: 'Место рождения',
   residence: 'Где жил(а)',
   education: 'Образование',
