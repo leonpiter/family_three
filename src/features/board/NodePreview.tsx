@@ -4,7 +4,7 @@ import { VeteranStar } from '../../components/ui/VeteranStar'
 import { STR } from '../../lib/strings'
 import type { Person } from '../../types/domain'
 
-const CARD_W = 268
+const CARD_W = 320
 
 // Быстрый «типс» сбоку от кружочка: крупное фото + ключевые факты о жизни.
 // Некликабельный (pointer-events-none) — действия остаются в сайдбаре по клику.
@@ -20,7 +20,7 @@ export function NodePreview({
   // справа от ноды, если не помещается — слева
   const spaceRight = window.innerWidth - rect.right
   const left = spaceRight > CARD_W + 24 ? rect.right + 12 : rect.left - CARD_W - 12
-  const top = Math.min(Math.max(rect.top - 20, 8), window.innerHeight - 360)
+  const top = Math.min(Math.max(rect.top - 40, 8), window.innerHeight - 440)
 
   const years = lifeYears(person)
   const age = ageInfo(person)
@@ -38,9 +38,9 @@ export function NodePreview({
       style={{ left, top, width: CARD_W }}
     >
       <div className="flex flex-col items-center text-center">
-        <div className="relative">
+        <div className="relative w-full">
           <div
-            className={`flex h-36 w-36 items-center justify-center overflow-hidden rounded-xl border-2 text-4xl font-semibold ${circleClass(person.gender)}`}
+            className={`flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl border-2 text-6xl font-semibold ${circleClass(person.gender)}`}
           >
             {avatarUrl ? (
               <img
@@ -52,7 +52,7 @@ export function NodePreview({
               initialsOf(person)
             )}
           </div>
-          {person.military_status === 'fought' && <VeteranStar size={28} />}
+          {person.military_status === 'fought' && <VeteranStar size={32} />}
         </div>
         <div className="mt-2 text-sm font-semibold text-neutral-900">{fullNameLong(person)}</div>
         {(years || age) && (
