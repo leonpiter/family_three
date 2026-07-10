@@ -14,9 +14,19 @@ import { circleClass, initialsOf } from '../../lib/avatar'
 import { ageInfo, fullName, fullNameLong, lifeYears, personToInput } from '../../lib/person'
 import { STR } from '../../lib/strings'
 import { Button } from '../../components/ui/Button'
-import type { Person } from '../../types/domain'
+import { VeteranStar } from '../../components/ui/VeteranStar'
+import type { MilitaryStatus, Person } from '../../types/domain'
 
 dayjs.locale('ru')
+
+const militaryLabel = (s: MilitaryStatus | null): string | null =>
+  s === 'not_served'
+    ? STR.militaryNotServed
+    : s === 'served'
+      ? STR.militaryServed
+      : s === 'fought'
+        ? STR.militaryFought
+        : null
 
 const fmtDate = (d: string) => dayjs(d).format('D MMMM YYYY')
 
@@ -80,14 +90,17 @@ export function PersonSidebar({
 
       <div className="flex-1 overflow-y-auto p-5">
         <div className="flex flex-col items-center text-center">
-          <div
-            className={`flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 text-3xl font-semibold ${circleClass(person.gender)}`}
-          >
-            {avatarUrl ? (
-              <img src={avatarUrl} alt={fullName(person)} className="h-full w-full object-cover" />
-            ) : (
-              initialsOf(person)
-            )}
+          <div className="relative">
+            <div
+              className={`flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 text-3xl font-semibold ${circleClass(person.gender)}`}
+            >
+              {avatarUrl ? (
+                <img src={avatarUrl} alt={fullName(person)} className="h-full w-full object-cover" />
+              ) : (
+                initialsOf(person)
+              )}
+            </div>
+            {person.military_status === 'fought' && <VeteranStar size={26} />}
           </div>
           <div className="mt-2 text-base font-semibold text-neutral-900">
             {fullNameLong(person)}
@@ -110,6 +123,12 @@ export function PersonSidebar({
           {fieldRow(STR.birthDate, person.birth_date ? fmtDate(person.birth_date) : null)}
           {fieldRow(STR.deathDate, person.death_date ? fmtDate(person.death_date) : null)}
           {fieldRow(STR.birthPlace, person.birth_place)}
+          {fieldRow(STR.residence, person.residence)}
+          {fieldRow(STR.education, person.education)}
+          {fieldRow(STR.occupation, person.occupation)}
+          {fieldRow(STR.achievements, person.achievements)}
+          {fieldRow(STR.militaryStatus, militaryLabel(person.military_status))}
+          {fieldRow(STR.militaryNotes, person.military_notes)}
           {fieldRow(STR.bio, person.bio)}
           {canEdit ? (
             <Button variant="secondary" onClick={() => setEditOpen(true)} className="w-full">

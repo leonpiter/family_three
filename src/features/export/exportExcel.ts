@@ -32,6 +32,19 @@ export async function exportToExcel(
     'Дата рождения': d(p.birth_date),
     'Дата смерти': d(p.death_date),
     'Место рождения': p.birth_place ?? '',
+    'Где жил': p.residence ?? '',
+    Образование: p.education ?? '',
+    'Кем работал': p.occupation ?? '',
+    Достижения: p.achievements ?? '',
+    Служба:
+      p.military_status === 'fought'
+        ? 'воевал'
+        : p.military_status === 'served'
+          ? 'служил'
+          : p.military_status === 'not_served'
+            ? 'не служил'
+            : '',
+    'Боевой путь': p.military_notes ?? '',
     Родители: getParents(p.id, relationships)
       .map((l) => name(l.personId))
       .join(', '),
@@ -62,7 +75,9 @@ export async function exportToExcel(
 
   const wb = XLSX.utils.book_new()
   const ws1 = XLSX.utils.json_to_sheet(peopleRows)
-  ws1['!cols'] = [18, 14, 16, 16, 6, 12, 12, 22, 30, 30, 30, 30, 50].map((wch) => ({ wch }))
+  ws1['!cols'] = [
+    18, 14, 16, 16, 6, 12, 12, 22, 22, 24, 24, 30, 12, 30, 30, 30, 30, 30, 50,
+  ].map((wch) => ({ wch }))
   XLSX.utils.book_append_sheet(wb, ws1, 'Родственники')
   const ws2 = XLSX.utils.json_to_sheet(relRows)
   ws2['!cols'] = [30, 18, 30].map((wch) => ({ wch }))

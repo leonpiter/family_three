@@ -1,6 +1,7 @@
 import { Handle, Position, type NodeProps } from '@xyflow/react'
 import { circleClass, initialsOf } from '../../lib/avatar'
 import { fullName, lifeYears } from '../../lib/person'
+import { VeteranStar } from '../../components/ui/VeteranStar'
 import type { PersonFlowNode } from './mapToFlow'
 
 const handleCls =
@@ -34,19 +35,22 @@ export function PersonNode({ data, selected }: NodeProps<PersonFlowNode>) {
         style={{ top: 44 }}
         className={handleCls}
       />
-      <div
-        className={`flex h-22 w-22 items-center justify-center overflow-hidden rounded-full border-2 text-2xl font-semibold shadow-sm ${circleClass(p.gender)} ${ring}`}
-      >
-        {data.avatarUrl ? (
-          <img
-            src={data.avatarUrl}
-            alt={fullName(p)}
-            draggable={false}
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          initialsOf(p)
-        )}
+      <div className="relative">
+        <div
+          className={`flex h-22 w-22 items-center justify-center overflow-hidden rounded-full border-2 text-2xl font-semibold shadow-sm ${circleClass(p.gender)} ${ring}`}
+        >
+          {data.avatarUrl ? (
+            <img
+              src={data.avatarUrl}
+              alt={fullName(p)}
+              draggable={false}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            initialsOf(p)
+          )}
+        </div>
+        {p.military_status === 'fought' && <VeteranStar size={24} />}
       </div>
       <div className="mt-1.5 max-w-full text-center text-xs font-medium leading-tight text-neutral-800">
         {fullName(p)}

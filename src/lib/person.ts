@@ -12,6 +12,12 @@ export function personToInput(p: Person): PersonInput {
     death_date: p.death_date,
     birth_place: p.birth_place,
     bio: p.bio,
+    education: p.education,
+    occupation: p.occupation,
+    achievements: p.achievements,
+    residence: p.residence,
+    military_status: p.military_status,
+    military_notes: p.military_notes,
   }
 }
 

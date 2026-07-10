@@ -3,7 +3,7 @@ import { toast } from 'sonner'
 import { supabase } from '../../lib/supabase'
 import { STR } from '../../lib/strings'
 import { normalizeSpousePair } from '../../lib/relations'
-import type { Person, Relationship, RelType, Gender } from '../../types/domain'
+import type { Person, Relationship, RelType, Gender, MilitaryStatus } from '../../types/domain'
 
 export interface PersonInput {
   first_name: string
@@ -15,6 +15,12 @@ export interface PersonInput {
   death_date: string | null
   birth_place: string | null
   bio: string | null
+  education: string | null
+  occupation: string | null
+  achievements: string | null
+  residence: string | null
+  military_status: MilitaryStatus | null
+  military_notes: string | null
 }
 
 interface BoardState {

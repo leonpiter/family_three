@@ -90,6 +90,16 @@ export default function AdminPage() {
     void load()
   }
 
+  const setRole = async (id: string, role: 'admin' | 'member') => {
+    const { error } = await supabase.from('profiles').update({ role }).eq('id', id)
+    if (error) {
+      toast.error(STR.saveError)
+      return
+    }
+    toast.success(STR.saved)
+    void load()
+  }
+
   const personName = (r: OpenRequest) =>
     r.person
       ? [r.person.first_name, r.person.middle_name, r.person.last_name].filter(Boolean).join(' ')
@@ -184,7 +194,7 @@ export default function AdminPage() {
                     </td>
                     <td className="px-4 py-2.5">
                       {p.id !== me?.id && (
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2">
                           {p.status !== 'approved' && (
                             <Button onClick={() => void setStatus(p.id, 'approved')}>
                               {STR.approve}
@@ -195,6 +205,16 @@ export default function AdminPage() {
                               {STR.reject}
                             </Button>
                           )}
+                          {p.status === 'approved' &&
+                            (p.role === 'admin' ? (
+                              <Button variant="secondary" onClick={() => void setRole(p.id, 'member')}>
+                                {STR.revokeAdmin}
+                              </Button>
+                            ) : (
+                              <Button variant="secondary" onClick={() => void setRole(p.id, 'admin')}>
+                                {STR.makeAdmin}
+                              </Button>
+                            ))}
                         </div>
                       )}
                     </td>

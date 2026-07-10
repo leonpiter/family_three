@@ -12,6 +12,7 @@ export interface Profile {
 
 export type Gender = 'm' | 'f'
 export type RelType = 'parent' | 'spouse'
+export type MilitaryStatus = 'not_served' | 'served' | 'fought'
 
 export interface Person {
   id: string
@@ -24,6 +25,12 @@ export interface Person {
   death_date: string | null
   birth_place: string | null
   bio: string | null
+  education: string | null
+  occupation: string | null
+  achievements: string | null
+  residence: string | null
+  military_status: MilitaryStatus | null
+  military_notes: string | null
   user_id: string | null
   avatar_photo_id: string | null
   pos_x: number

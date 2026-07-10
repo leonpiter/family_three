@@ -3,7 +3,7 @@ import { Modal } from '../../components/ui/Modal'
 import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
 import { STR } from '../../lib/strings'
-import type { Gender } from '../../types/domain'
+import type { Gender, MilitaryStatus } from '../../types/domain'
 import type { PersonInput } from './boardStore'
 
 const emptyInput: PersonInput = {
@@ -16,6 +16,12 @@ const emptyInput: PersonInput = {
   death_date: null,
   birth_place: null,
   bio: null,
+  education: null,
+  occupation: null,
+  achievements: null,
+  residence: null,
+  military_status: null,
+  military_notes: null,
 }
 
 const inputCls =
@@ -112,6 +118,57 @@ export function PersonDialog({
           value={values.birth_place ?? ''}
           onChange={(e) => setField('birth_place', orNull(e.target.value))}
         />
+        <Field
+          label={STR.residence}
+          value={values.residence ?? ''}
+          onChange={(e) => setField('residence', orNull(e.target.value))}
+        />
+        <Field
+          label={STR.education}
+          value={values.education ?? ''}
+          onChange={(e) => setField('education', orNull(e.target.value))}
+        />
+        <Field
+          label={STR.occupation}
+          value={values.occupation ?? ''}
+          onChange={(e) => setField('occupation', orNull(e.target.value))}
+        />
+        <label className="block">
+          <span className="mb-1 block text-sm text-neutral-600">{STR.achievements}</span>
+          <textarea
+            value={values.achievements ?? ''}
+            onChange={(e) => setField('achievements', orNull(e.target.value))}
+            rows={2}
+            className={inputCls}
+          />
+        </label>
+        <label className="block">
+          <span className="mb-1 block text-sm text-neutral-600">{STR.militaryStatus}</span>
+          <select
+            value={values.military_status ?? ''}
+            onChange={(e) =>
+              setField('military_status', (e.target.value || null) as MilitaryStatus | null)
+            }
+            className={inputCls}
+          >
+            <option value="">{STR.militaryUnset}</option>
+            <option value="not_served">{STR.militaryNotServed}</option>
+            <option value="served">{STR.militaryServed}</option>
+            <option value="fought">{STR.militaryFought}</option>
+          </select>
+        </label>
+        {(values.military_status === 'served' || values.military_status === 'fought') && (
+          <label className="block">
+            <span className="mb-1 block text-sm text-neutral-600">{STR.militaryNotes}</span>
+            <textarea
+              value={values.military_notes ?? ''}
+              onChange={(e) => setField('military_notes', orNull(e.target.value))}
+              rows={2}
+              placeholder={STR.militaryNotesHint}
+              className={inputCls}
+            />
+          </label>
+        )}
         <label className="block">
           <span className="mb-1 block text-sm text-neutral-600">{STR.bio}</span>
           <textarea
