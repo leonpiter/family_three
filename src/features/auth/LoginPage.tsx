@@ -49,6 +49,11 @@ export default function LoginPage() {
           {STR.loginButton}
         </Button>
       </form>
+      <p className="mt-3 text-center text-sm">
+        <Link to="/reset" className="text-neutral-500 hover:text-neutral-900 hover:underline">
+          {STR.forgotPassword}
+        </Link>
+      </p>
       <p className="mt-4 text-center text-sm text-neutral-500">
         {STR.noAccount}{' '}
         <Link to="/register" className="text-emerald-700 hover:underline">

@@ -22,6 +22,21 @@ export const STR = {
   checkEmailHint: 'Если письма нет — проверьте папку «Спам».',
   signOut: 'Выйти',
 
+  // Восстановление пароля
+  forgotPassword: 'Забыли пароль?',
+  resetTitle: 'Восстановление пароля',
+  resetHint: 'Укажите email — пришлём ссылку для смены пароля.',
+  resetSend: 'Отправить ссылку',
+  resetSentTitle: 'Проверьте почту',
+  resetSentText: 'Если аккаунт с таким email существует, мы отправили ссылку для смены пароля на',
+  backToLogin: 'Вернуться ко входу',
+  newPasswordTitle: 'Новый пароль',
+  newPasswordLabel: 'Новый пароль',
+  newPasswordRepeat: 'Повторите пароль',
+  newPasswordSave: 'Сохранить пароль',
+  passwordsMismatch: 'Пароли не совпадают',
+  passwordChanged: 'Пароль изменён',
+
   // Pending / rejected
   pendingTitle: 'Заявка на рассмотрении',
   pendingText:

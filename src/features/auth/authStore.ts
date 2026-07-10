@@ -7,6 +7,9 @@ interface AuthState {
   session: Session | null
   profile: Profile | null
   initializing: boolean
+  // true после перехода по ссылке восстановления пароля — ведём на /new-password
+  passwordRecovery: boolean
+  setPasswordRecovery: (v: boolean) => void
   init: () => Promise<void>
   refreshProfile: () => Promise<void>
   signOut: () => Promise<void>
@@ -18,6 +21,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   session: null,
   profile: null,
   initializing: true,
+  passwordRecovery: false,
+
+  setPasswordRecovery: (v) => set({ passwordRecovery: v }),
 
   init: async () => {
     if (initialized) return
@@ -30,8 +36,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (session) await get().refreshProfile()
     set({ initializing: false })
 
-    supabase.auth.onAuthStateChange((_event, newSession) => {
+    supabase.auth.onAuthStateChange((event, newSession) => {
       set({ session: newSession })
+      // Переход по ссылке из письма восстановления — сессия временная,
+      // пользователя ведём задавать новый пароль.
+      if (event === 'PASSWORD_RECOVERY') set({ passwordRecovery: true })
       // Известная ловушка supabase-js: await внутри колбэка onAuthStateChange
       // блокирует обработку — выносим запрос профиля из колбэка.
       if (newSession) {
