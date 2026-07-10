@@ -27,7 +27,7 @@ import { computeTreeLayout } from './autoLayout'
 import { BirthdaysPanel } from './BirthdaysPanel'
 import { SurnamePanel } from './SurnamePanel'
 import { NodePreview } from './NodePreview'
-import { normalizeSurname } from '../../lib/surname'
+import { canonicalSurname } from '../../lib/surname'
 import { PersonSidebar } from '../person/PersonSidebar'
 import { PersonPickerDialog } from '../person/PersonPickerDialog'
 import { useAvatars } from '../photos/useAvatars'
@@ -297,7 +297,7 @@ function Board() {
     const avatarUrl = avatars.get(n.id)
     const dropTarget = n.id === dropTargetId
     const dimmed =
-      surnameFilter != null && normalizeSurname(persons[n.id]?.last_name) !== surnameFilter
+      surnameFilter != null && canonicalSurname(persons[n.id]?.last_name) !== surnameFilter
     if (!avatarUrl && !dropTarget && !dimmed) return n
     return { ...n, data: { ...n.data, avatarUrl, dropTarget, dimmed } }
   })

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useBoardStore } from './boardStore'
-import { normalizeSurname, surnameColor } from '../../lib/surname'
+import { canonicalSurname, surnameColor } from '../../lib/surname'
 import { STR } from '../../lib/strings'
 
 // Легенда фамильных линий: цвет + количество; клик выделяет линию (остальные
@@ -16,9 +16,10 @@ export function SurnamePanel({
   const [open, setOpen] = useState(false)
 
   const groups = useMemo(() => {
+    // Ключ — каноническая (мужская) форма: «Мазелев» и «Мазелева» — одна ветка
     const counts = new Map<string, number>()
     for (const p of Object.values(persons)) {
-      const s = normalizeSurname(p.last_name)
+      const s = canonicalSurname(p.last_name)
       if (s) counts.set(s, (counts.get(s) ?? 0) + 1)
     }
     return [...counts.entries()]

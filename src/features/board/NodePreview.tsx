@@ -1,6 +1,6 @@
 import { circleClass, initialsOf } from '../../lib/avatar'
 import { ageInfo, fullNameLong, lifeYears, militaryLabel } from '../../lib/person'
-import { normalizeSurname, surnameColor } from '../../lib/surname'
+import { canonicalSurname, surnameColor } from '../../lib/surname'
 import { VeteranStar } from '../../components/ui/VeteranStar'
 import { STR, fmt } from '../../lib/strings'
 import type { Person } from '../../types/domain'
@@ -61,13 +61,13 @@ export function NodePreview({
             {[years, age].filter(Boolean).join(' · ')}
           </div>
         )}
-        {normalizeSurname(person.last_name) && (
+        {canonicalSurname(person.last_name) && (
           <div className="mt-1 flex items-center gap-1.5 text-xs text-neutral-500">
             <span
               className="h-2.5 w-2.5 rounded-full"
               style={{ backgroundColor: surnameColor(person.last_name)! }}
             />
-            {fmt.surnameBranch(normalizeSurname(person.last_name))}
+            {fmt.surnameBranch(canonicalSurname(person.last_name))}
           </div>
         )}
       </div>
