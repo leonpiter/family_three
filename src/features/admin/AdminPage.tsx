@@ -132,98 +132,127 @@ export default function AdminPage() {
     void load()
   }
 
+  const statusBadge = (p: Profile) => (
+    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusView[p.status].cls}`}>
+      {statusView[p.status].label}
+    </span>
+  )
+
+  const personLink = (p: Profile, full = false) =>
+    p.status === 'approved' ? (
+      <select
+        value={persons.find((pe) => pe.user_id === p.id)?.id ?? ''}
+        onChange={(e) => void linkPerson(p.id, e.target.value)}
+        className={`rounded-lg border border-neutral-300 px-2 py-1 text-sm outline-none focus:border-emerald-600 ${full ? 'w-full' : 'w-44'}`}
+      >
+        <option value="">{STR.notLinked}</option>
+        {persons
+          .filter((pe) => !pe.user_id || pe.user_id === p.id)
+          .map((pe) => (
+            <option key={pe.id} value={pe.id}>
+              {liteName(pe)}
+            </option>
+          ))}
+      </select>
+    ) : (
+      <span className="text-neutral-300">—</span>
+    )
+
+  const actions = (p: Profile) =>
+    p.id === me?.id ? null : (
+      <div className="flex flex-wrap gap-2">
+        {p.status !== 'approved' && (
+          <Button onClick={() => void setStatus(p.id, 'approved')}>{STR.approve}</Button>
+        )}
+        {p.status !== 'rejected' && (
+          <Button variant="danger" onClick={() => void setStatus(p.id, 'rejected')}>
+            {STR.reject}
+          </Button>
+        )}
+        {p.status === 'approved' &&
+          (p.role === 'admin' ? (
+            <Button variant="secondary" onClick={() => void setRole(p.id, 'member')}>
+              {STR.revokeAdmin}
+            </Button>
+          ) : (
+            <Button variant="secondary" onClick={() => void setRole(p.id, 'admin')}>
+              {STR.makeAdmin}
+            </Button>
+          ))}
+      </div>
+    )
+
+  const nameWithRole = (p: Profile) => (
+    <>
+      {p.display_name || '—'}
+      {p.role === 'admin' && (
+        <span className="ml-2 rounded bg-neutral-100 px-1.5 py-0.5 text-xs text-neutral-500">
+          {STR.roleAdmin}
+        </span>
+      )}
+    </>
+  )
+
   return (
-    <div className="mx-auto max-w-3xl p-6">
+    <div className="mx-auto max-w-5xl p-4 sm:p-6">
       <h1 className="mb-4 text-lg font-semibold text-neutral-900">{STR.adminTitle}</h1>
       {profiles.length === 0 ? (
         <p className="text-sm text-neutral-500">{STR.noProfiles}</p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-neutral-200 bg-white">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-neutral-200 text-left text-neutral-500">
-                <th className="px-4 py-2.5 font-medium">{STR.colName}</th>
-                <th className="px-4 py-2.5 font-medium">{STR.colEmail}</th>
-                <th className="px-4 py-2.5 font-medium">{STR.colDate}</th>
-                <th className="px-4 py-2.5 font-medium">{STR.colStatus}</th>
-                <th className="px-4 py-2.5 font-medium">{STR.colPersonLink}</th>
-                <th className="px-4 py-2.5 font-medium">{STR.colActions}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {profiles.map((p) => {
-                const sv = statusView[p.status]
-                return (
-                  <tr key={p.id} className="border-b border-neutral-100 last:border-0">
-                    <td className="px-4 py-2.5 text-neutral-900">
-                      {p.display_name || '—'}
-                      {p.role === 'admin' && (
-                        <span className="ml-2 rounded bg-neutral-100 px-1.5 py-0.5 text-xs text-neutral-500">
-                          {STR.roleAdmin}
-                        </span>
-                      )}
+        <>
+          {/* Десктоп: таблица во всю ширину без внутренней прокрутки */}
+          <div className="hidden rounded-xl border border-neutral-200 bg-white md:block">
+            <table className="w-full table-fixed text-sm">
+              <thead>
+                <tr className="border-b border-neutral-200 text-left text-neutral-500">
+                  <th className="w-40 px-4 py-2.5 font-medium">{STR.colName}</th>
+                  <th className="px-4 py-2.5 font-medium">{STR.colEmail}</th>
+                  <th className="w-28 px-4 py-2.5 font-medium">{STR.colDate}</th>
+                  <th className="w-24 px-4 py-2.5 font-medium">{STR.colStatus}</th>
+                  <th className="w-48 px-4 py-2.5 font-medium">{STR.colPersonLink}</th>
+                  <th className="px-4 py-2.5 font-medium">{STR.colActions}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {profiles.map((p) => (
+                  <tr key={p.id} className="border-b border-neutral-100 align-top last:border-0">
+                    <td className="px-4 py-3 text-neutral-900">{nameWithRole(p)}</td>
+                    <td className="truncate px-4 py-3 text-neutral-600">{p.email ?? '—'}</td>
+                    <td className="px-4 py-3 text-neutral-500">
+                      {dayjs(p.created_at).format('D MMM YYYY')}
                     </td>
-                    <td className="px-4 py-2.5 text-neutral-600">{p.email ?? '—'}</td>
-                    <td className="px-4 py-2.5 text-neutral-500">
-                      {dayjs(p.created_at).format('D MMMM YYYY')}
-                    </td>
-                    <td className="px-4 py-2.5">
-                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${sv.cls}`}>
-                        {sv.label}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2.5">
-                      {p.status === 'approved' ? (
-                        <select
-                          value={persons.find((pe) => pe.user_id === p.id)?.id ?? ''}
-                          onChange={(e) => void linkPerson(p.id, e.target.value)}
-                          className="w-44 rounded-lg border border-neutral-300 px-2 py-1 text-sm outline-none focus:border-emerald-600"
-                        >
-                          <option value="">{STR.notLinked}</option>
-                          {persons
-                            .filter((pe) => !pe.user_id || pe.user_id === p.id)
-                            .map((pe) => (
-                              <option key={pe.id} value={pe.id}>
-                                {liteName(pe)}
-                              </option>
-                            ))}
-                        </select>
-                      ) : (
-                        <span className="text-neutral-300">—</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-2.5">
-                      {p.id !== me?.id && (
-                        <div className="flex flex-wrap gap-2">
-                          {p.status !== 'approved' && (
-                            <Button onClick={() => void setStatus(p.id, 'approved')}>
-                              {STR.approve}
-                            </Button>
-                          )}
-                          {p.status !== 'rejected' && (
-                            <Button variant="danger" onClick={() => void setStatus(p.id, 'rejected')}>
-                              {STR.reject}
-                            </Button>
-                          )}
-                          {p.status === 'approved' &&
-                            (p.role === 'admin' ? (
-                              <Button variant="secondary" onClick={() => void setRole(p.id, 'member')}>
-                                {STR.revokeAdmin}
-                              </Button>
-                            ) : (
-                              <Button variant="secondary" onClick={() => void setRole(p.id, 'admin')}>
-                                {STR.makeAdmin}
-                              </Button>
-                            ))}
-                        </div>
-                      )}
-                    </td>
+                    <td className="px-4 py-3">{statusBadge(p)}</td>
+                    <td className="px-4 py-3">{personLink(p)}</td>
+                    <td className="px-4 py-3">{actions(p)}</td>
                   </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Мобильный: карточки */}
+          <div className="space-y-3 md:hidden">
+            {profiles.map((p) => (
+              <div key={p.id} className="rounded-xl border border-neutral-200 bg-white p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-medium text-neutral-900">{nameWithRole(p)}</span>
+                  {statusBadge(p)}
+                </div>
+                <div className="mt-1 truncate text-sm text-neutral-600">{p.email ?? '—'}</div>
+                <div className="text-xs text-neutral-400">
+                  {dayjs(p.created_at).format('D MMMM YYYY')}
+                </div>
+                {p.status === 'approved' && (
+                  <div className="mt-3">
+                    <div className="mb-1 text-xs text-neutral-400">{STR.colPersonLink}</div>
+                    {personLink(p, true)}
+                  </div>
+                )}
+                <div className="mt-3">{actions(p)}</div>
+              </div>
+            ))}
+          </div>
+        </>
       )}
 
       <h2 className="mb-3 mt-8 text-lg font-semibold text-neutral-900">
