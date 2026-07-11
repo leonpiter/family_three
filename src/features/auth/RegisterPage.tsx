@@ -8,6 +8,7 @@ import { STR } from '../../lib/strings'
 import { AuthCard } from '../../components/ui/AuthCard'
 import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
+import { PasswordField } from '../../components/ui/PasswordField'
 
 export default function RegisterPage() {
   const [displayName, setDisplayName] = useState('')
@@ -66,11 +67,11 @@ export default function RegisterPage() {
           autoComplete="email"
           required
         />
-        <Field
+        <PasswordField
           label={STR.passwordLabel}
-          type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          error={password.length > 0 && password.length < 6 ? STR.passwordTooShort : null}
           autoComplete="new-password"
           minLength={6}
           required

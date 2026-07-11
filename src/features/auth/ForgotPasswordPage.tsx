@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
-import { supabase } from '../../lib/supabase'
+import { supabaseRecovery } from '../../lib/supabase'
 import { authErrorMessage } from '../../lib/authErrors'
 import { siteUrl } from '../../lib/siteUrl'
 import { STR } from '../../lib/strings'
@@ -17,11 +17,11 @@ export default function ForgotPasswordPage() {
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setBusy(true)
-    // redirectTo с собственным маркером ?pwreset=1 — приложение распознаёт его
-    // при старте и ведёт на страницу нового пароля (надёжно с HashRouter;
-    // не 'type', чтобы supabase-js не принял за свой служебный параметр).
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${siteUrl()}?pwreset=1`,
+    // Запрос через implicit-клиент: ссылка из письма откроется в ЛЮБОМ браузере
+    // (в т.ч. встроенном в почтовое приложение). Токены прилетят в hash и будут
+    // сняты в main.tsx до старта роутера.
+    const { error } = await supabaseRecovery.auth.resetPasswordForEmail(email, {
+      redirectTo: siteUrl(),
     })
     setBusy(false)
     if (error) {

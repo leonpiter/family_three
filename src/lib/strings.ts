@@ -36,6 +36,11 @@ export const STR = {
   newPasswordSave: 'Сохранить пароль',
   passwordsMismatch: 'Пароли не совпадают',
   passwordChanged: 'Пароль изменён',
+  passwordTooShort: 'Не короче 6 символов',
+  showPassword: 'Показать пароль',
+  hidePassword: 'Скрыть пароль',
+  recoveryLinkInvalid: 'Ссылка недействительна или устарела — запросите новую',
+  recoveryPreparing: 'Проверяем ссылку…',
 
   // Pending / rejected
   pendingTitle: 'Заявка на рассмотрении',

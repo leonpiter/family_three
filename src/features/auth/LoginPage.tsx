@@ -7,6 +7,7 @@ import { STR } from '../../lib/strings'
 import { AuthCard } from '../../components/ui/AuthCard'
 import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
+import { PasswordField } from '../../components/ui/PasswordField'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -37,9 +38,8 @@ export default function LoginPage() {
           autoComplete="email"
           required
         />
-        <Field
+        <PasswordField
           label={STR.passwordLabel}
-          type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           autoComplete="current-password"

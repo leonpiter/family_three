@@ -7,25 +7,42 @@ import { useAuthStore } from './authStore'
 import { STR } from '../../lib/strings'
 import { AuthCard } from '../../components/ui/AuthCard'
 import { Button } from '../../components/ui/Button'
-import { Field } from '../../components/ui/Field'
+import { PasswordField } from '../../components/ui/PasswordField'
+import { Spinner } from '../../components/ui/Spinner'
 
-// Доступна только в режиме восстановления (после перехода по ссылке из письма).
+const MIN_LEN = 6
+
+// Доступна после перехода по ссылке восстановления (или залогиненному
+// пользователю — как смена пароля).
 export default function NewPasswordPage() {
   const navigate = useNavigate()
-  const { session, passwordRecovery, setPasswordRecovery } = useAuthStore()
+  const { session, initializing, passwordRecovery, setPasswordRecovery } = useAuthStore()
   const [password, setPassword] = useState('')
   const [repeat, setRepeat] = useState('')
   const [busy, setBusy] = useState(false)
 
-  // Прямой заход без восстановления и без сессии — на вход
-  if (!passwordRecovery && !session) return <Navigate to="/login" replace />
+  // Восстановление: сессия ставится из токенов ссылки — ждём её,
+  // иначе сохранение упало бы с ошибкой.
+  if (passwordRecovery && !session) {
+    return (
+      <AuthCard title={STR.newPasswordTitle}>
+        <div className="flex flex-col items-center gap-3 py-2">
+          <Spinner />
+          <p className="text-sm text-neutral-500">{STR.recoveryPreparing}</p>
+        </div>
+      </AuthCard>
+    )
+  }
+  if (!initializing && !passwordRecovery && !session) return <Navigate to="/login" replace />
+
+  const tooShort = password.length > 0 && password.length < MIN_LEN
+  const mismatch = repeat.length > 0 && password !== repeat
+  const canSubmit =
+    !busy && password.length >= MIN_LEN && repeat.length >= MIN_LEN && password === repeat
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    if (password !== repeat) {
-      toast.error(STR.passwordsMismatch)
-      return
-    }
+    if (!canSubmit) return
     setBusy(true)
     const { error } = await supabase.auth.updateUser({ password })
     setBusy(false)
@@ -41,26 +58,24 @@ export default function NewPasswordPage() {
   return (
     <AuthCard title={STR.newPasswordTitle}>
       <form onSubmit={(e) => void onSubmit(e)} className="space-y-3">
-        <Field
+        <PasswordField
           label={STR.newPasswordLabel}
-          type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          error={tooShort ? STR.passwordTooShort : null}
           autoComplete="new-password"
-          minLength={6}
           required
           autoFocus
         />
-        <Field
+        <PasswordField
           label={STR.newPasswordRepeat}
-          type="password"
           value={repeat}
           onChange={(e) => setRepeat(e.target.value)}
+          error={mismatch ? STR.passwordsMismatch : null}
           autoComplete="new-password"
-          minLength={6}
           required
         />
-        <Button type="submit" disabled={busy} className="w-full">
+        <Button type="submit" disabled={!canSubmit} className="w-full">
           {STR.newPasswordSave}
         </Button>
       </form>

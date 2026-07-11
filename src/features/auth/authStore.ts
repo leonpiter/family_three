@@ -1,6 +1,9 @@
 import { create } from 'zustand'
+import { toast } from 'sonner'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from '../../lib/supabase'
+import { takeRecoveryTokens } from '../../lib/recovery'
+import { STR } from '../../lib/strings'
 import type { Profile } from '../../types/domain'
 
 interface AuthState {
@@ -29,11 +32,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (initialized) return
     initialized = true
 
-    // Ссылка из письма восстановления помечена ?pwreset=1 — распознаём
-    // синхронно, до любых редиректов, и ведём на страницу нового пароля.
-    // (Событие PASSWORD_RECOVERY ниже — запасной путь.)
-    if (new URLSearchParams(window.location.search).get('pwreset') === '1') {
+    // Переход по ссылке восстановления: токены уже сняты с URL в main.tsx.
+    // Ставим сессию сами — это работает в любом браузере, включая встроенный
+    // в почтовое приложение.
+    const recovery = takeRecoveryTokens()
+    if (recovery) {
       set({ passwordRecovery: true })
+      const { error } = await supabase.auth.setSession(recovery)
+      if (error) {
+        set({ passwordRecovery: false, initializing: false })
+        toast.error(STR.recoveryLinkInvalid)
+        return
+      }
     }
 
     const {
