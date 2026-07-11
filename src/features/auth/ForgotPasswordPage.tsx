@@ -8,6 +8,7 @@ import { STR } from '../../lib/strings'
 import { AuthCard } from '../../components/ui/AuthCard'
 import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
+import { Notice } from '../../components/ui/Notice'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -38,6 +39,7 @@ export default function ForgotPasswordPage() {
           {STR.resetSentText} <b>{email}</b>
         </p>
         <p className="mt-2 text-center text-sm text-neutral-400">{STR.checkEmailHint}</p>
+        <Notice>{STR.resetLinkNotice}</Notice>
         <p className="mt-4 text-center text-sm">
           <Link to="/login" className="text-emerald-700 hover:underline">
             {STR.backToLogin}

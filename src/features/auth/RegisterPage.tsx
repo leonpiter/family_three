@@ -8,6 +8,7 @@ import { STR } from '../../lib/strings'
 import { AuthCard } from '../../components/ui/AuthCard'
 import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
+import { Notice } from '../../components/ui/Notice'
 import { PasswordField } from '../../components/ui/PasswordField'
 
 export default function RegisterPage() {
@@ -43,6 +44,7 @@ export default function RegisterPage() {
           {STR.checkEmailText} <b>{email}</b>
         </p>
         <p className="mt-2 text-center text-sm text-neutral-400">{STR.checkEmailHint}</p>
+        <Notice>{STR.confirmLinkNotice}</Notice>
       </AuthCard>
     )
   }
