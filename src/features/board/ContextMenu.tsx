@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useIsTouch } from '../../hooks/useIsTouch'
 
 export interface MenuItem {
@@ -19,17 +19,21 @@ export function ContextMenu(props: {
   y: number
   items: MenuItem[]
   onClose: () => void
+  // Быстрый просмотр в шапке мобильной шторки (на десктопе есть превью по hover)
+  header?: ReactNode
 }) {
   const isTouch = useIsTouch()
   return isTouch ? <MobileSheet {...props} /> : <DesktopMenu {...props} />
 }
 
-// --- Мобильная нижняя шторка: подменю раскрывается аккордеоном вниз ---
+// --- Мобильная нижняя шторка: превью сверху, подменю аккордеоном вниз ---
 function MobileSheet({
   items,
+  header,
   onClose,
 }: {
   items: MenuItem[]
+  header?: ReactNode
   onClose: () => void
 }) {
   const [expanded, setExpanded] = useState<number | null>(null)
@@ -61,6 +65,7 @@ function MobileSheet({
         <div className="sticky top-0 flex justify-center bg-white py-2">
           <span className="h-1 w-10 rounded-full bg-neutral-300" />
         </div>
+        {header}
         {items.map((item, i) => (
           <div key={i} className="border-t border-neutral-100 first:border-t-0">
             <button

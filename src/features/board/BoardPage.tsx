@@ -27,6 +27,7 @@ import { computeTreeLayout } from './autoLayout'
 import { BirthdaysPanel } from './BirthdaysPanel'
 import { SurnamePanel } from './SurnamePanel'
 import { NodePreview } from './NodePreview'
+import { PersonSheetHeader } from './PersonSheetHeader'
 import { canonicalSurname } from '../../lib/surname'
 import { PersonSidebar } from '../person/PersonSidebar'
 import { PersonPickerDialog } from '../person/PersonPickerDialog'
@@ -484,6 +485,13 @@ function Board() {
           x={menu.x}
           y={menu.y}
           items={buildMenuItems(persons[menu.personId])}
+          // Быстрый просмотр прямо в шторке — без открытия карточки
+          header={
+            <PersonSheetHeader
+              person={persons[menu.personId]}
+              avatarUrl={avatars.get(menu.personId)}
+            />
+          }
           onClose={() => setMenu(null)}
         />
       )}
